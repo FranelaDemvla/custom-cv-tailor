@@ -12,6 +12,12 @@ const LOADING_STEPS = [
   'Structuring tailored resume...',
 ]
 
+function getDefaultModel() {
+  if (import.meta.env.VITE_LLM_BASE_URL) return 'local'
+  if (import.meta.env.VITE_OPENAI_API_KEY) return 'openai'
+  return 'local'
+}
+
 export default function App() {
   const [cvText, setCvText] = useState('')
   const [jdText, setJdText] = useState('')
@@ -19,6 +25,7 @@ export default function App() {
   const [stepIndex, setStepIndex] = useState(0)
   const [resumeData, setResumeData] = useState(null)
   const [error, setError] = useState(null)
+  const [model, setModel] = useState(getDefaultModel)
 
   const handleGenerate = useCallback(async () => {
     setError(null)
@@ -34,7 +41,7 @@ export default function App() {
     }, 1500)
 
     try {
-      const data = await tailorCV(cvText, jdText)
+      const data = await tailorCV(cvText, jdText, model)
       clearInterval(stepTimer)
       setStepIndex(LOADING_STEPS.length)
       setResumeData(data)
@@ -44,7 +51,7 @@ export default function App() {
       setError(err.message || 'An unexpected error occurred')
       setStatus('error')
     }
-  }, [cvText, jdText])
+  }, [cvText, jdText, model])
 
   const handleDownload = useCallback(async () => {
     if (!resumeData) return
@@ -67,7 +74,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
+      <Header model={model} onModelChange={setModel} />
       <main className="flex-1 flex flex-col lg:flex-row gap-6 p-6 max-w-7xl mx-auto w-full">
         <div className="flex-1 min-w-0">
           <InputPanel

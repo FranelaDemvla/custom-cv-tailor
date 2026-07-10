@@ -62,22 +62,32 @@ function cleanJSONResponse(text) {
     .trim()
 }
 
-function getLLMConfig() {
-  const baseURL = import.meta.env.VITE_LLM_BASE_URL || null
-  const apiKey =
-    import.meta.env.VITE_OPENAI_API_KEY ||
-    import.meta.env.VITE_LLM_API_KEY ||
-    (baseURL ? 'lm-studio' : null)
-
-  return {
-    baseURL,
-    apiKey,
-    model: import.meta.env.VITE_LLM_MODEL || 'gpt-4o',
-    isLocal: !!baseURL,
-  }
+const LOCAL_CONFIG = {
+  baseURL: import.meta.env.VITE_LLM_BASE_URL || 'http://127.0.0.1:1234/v1',
+  apiKey: import.meta.env.VITE_LLM_API_KEY || 'lm-studio',
+  model: import.meta.env.VITE_LLM_MODEL || '',
 }
 
-export async function tailorCV(cvText, jobDescription) {
+const OPENAI_CONFIG = {
+  baseURL: null,
+  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+  model: 'gpt-4o',
+}
+
+function getLLMConfig(modelPreference) {
+  if (modelPreference === 'openai') {
+    if (!OPENAI_CONFIG.apiKey) {
+      throw new Error(
+        'OpenAI API key not configured. Set VITE_OPENAI_API_KEY in your .env file.'
+      )
+    }
+    return { ...OPENAI_CONFIG, isLocal: false }
+  }
+
+  return { ...LOCAL_CONFIG, isLocal: true }
+}
+
+export async function tailorCV(cvText, jobDescription, modelPreference = 'local') {
   if (!cvText || !cvText.trim()) {
     throw new Error('CV text is required')
   }
@@ -86,11 +96,11 @@ export async function tailorCV(cvText, jobDescription) {
     throw new Error('Job description is required')
   }
 
-  const { baseURL, apiKey, model, isLocal } = getLLMConfig()
+  const { baseURL, apiKey, model, isLocal } = getLLMConfig(modelPreference)
 
   if (!apiKey) {
     throw new Error(
-      'API key is required. Set VITE_OPENAI_API_KEY for OpenAI or VITE_LLM_API_KEY / VITE_LLM_BASE_URL for a local model.'
+      'API key is required. Set VITE_OPENAI_API_KEY for OpenAI or configure VITE_LLM_BASE_URL for a local model.'
     )
   }
 
