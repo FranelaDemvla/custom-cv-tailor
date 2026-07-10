@@ -63,9 +63,18 @@ function cleanJSONResponse(text) {
 }
 
 const LOCAL_CONFIG = {
-  baseURL: import.meta.env.VITE_LLM_BASE_URL || 'http://127.0.0.1:1234/v1',
-  apiKey: import.meta.env.VITE_LLM_API_KEY || 'lm-studio',
-  model: import.meta.env.VITE_LLM_MODEL || '',
+  get baseURL() {
+    if (import.meta.env.PROD) {
+      return import.meta.env.VITE_LLM_BASE_URL || 'http://127.0.0.1:1234/v1'
+    }
+    return window.location.origin + '/api/llm'
+  },
+  get apiKey() {
+    return import.meta.env.VITE_LLM_API_KEY || 'lm-studio'
+  },
+  get model() {
+    return import.meta.env.VITE_LLM_MODEL || ''
+  },
 }
 
 const OPENAI_CONFIG = {
