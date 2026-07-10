@@ -17,9 +17,23 @@ export async function parseDocx(file) {
 
 export async function parsePdf(file) {
   const buffer = await file.arrayBuffer()
-  const pdfParse = (await import('pdf-parse')).default
-  const data = await pdfParse(Buffer.from(buffer))
-  return cleanText(data.text)
+  const pdfjsLib = await import('pdfjs-dist')
+
+  pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+    'pdfjs-dist/build/pdf.worker.min.mjs',
+    import.meta.url
+  ).toString()
+
+  const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buffer) }).promise
+  const pages = []
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i)
+    const content = await page.getTextContent()
+    const text = content.items.map((item) => item.str).join(' ')
+    pages.push(text)
+  }
+
+  return cleanText(pages.join('\n\n'))
 }
 
 export async function parseCVFile(file) {
