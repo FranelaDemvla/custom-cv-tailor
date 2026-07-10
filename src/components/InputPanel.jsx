@@ -1,11 +1,9 @@
 import { useState, useRef, useCallback } from 'react'
-import { Upload, FileText, Loader2, AlertCircle } from 'lucide-react'
+import { Upload, FileText, Loader2, AlertCircle, Sparkles } from 'lucide-react'
 import { clsx } from 'clsx'
 import { parseCVFile } from '../services/parserService'
 
-export default function InputPanel() {
-  const [cvText, setCvText] = useState('')
-  const [jdText, setJdText] = useState('')
+export default function InputPanel({ cvText, jdText, onCvChange, onJdChange, onGenerate, canGenerate, isGenerating }) {
   const [isParsing, setIsParsing] = useState(false)
   const [parseError, setParseError] = useState(null)
   const [isDragging, setIsDragging] = useState(false)
@@ -16,13 +14,13 @@ export default function InputPanel() {
     setParseError(null)
     try {
       const text = await parseCVFile(file)
-      setCvText(text)
+      onCvChange(text)
     } catch (err) {
       setParseError(err.message || 'Failed to parse file')
     } finally {
       setIsParsing(false)
     }
-  }, [])
+  }, [onCvChange])
 
   const handleDrop = useCallback((e) => {
     e.preventDefault()
@@ -47,8 +45,13 @@ export default function InputPanel() {
     e.target.value = ''
   }, [handleFile])
 
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    if (canGenerate) onGenerate()
+  }
+
   return (
-    <div className="bg-white rounded-xl border border-surface-200 p-6 space-y-6">
+    <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-surface-200 p-6 space-y-6">
       <h2 className="text-lg font-semibold text-surface-900">Your CV & Job Description</h2>
 
       <div className="space-y-2">
@@ -102,7 +105,7 @@ export default function InputPanel() {
         </label>
         <textarea
           value={cvText}
-          onChange={(e) => setCvText(e.target.value)}
+          onChange={(e) => onCvChange(e.target.value)}
           placeholder="Paste your CV here, or upload a file above..."
           rows={10}
           className="w-full rounded-lg border border-surface-200 bg-surface-50 p-3 text-sm text-surface-800 placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-y"
@@ -116,12 +119,35 @@ export default function InputPanel() {
         </label>
         <textarea
           value={jdText}
-          onChange={(e) => setJdText(e.target.value)}
+          onChange={(e) => onJdChange(e.target.value)}
           placeholder="Paste the job description here..."
           rows={10}
           className="w-full rounded-lg border border-surface-200 bg-surface-50 p-3 text-sm text-surface-800 placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-y"
         />
       </div>
-    </div>
+
+      <button
+        type="submit"
+        disabled={!canGenerate}
+        className={clsx(
+          'w-full py-3 rounded-lg font-medium text-sm flex items-center justify-center gap-2 transition-colors',
+          canGenerate
+            ? 'bg-brand-600 text-white hover:bg-brand-700 cursor-pointer'
+            : 'bg-surface-200 text-surface-400 cursor-not-allowed'
+        )}
+      >
+        {isGenerating ? (
+          <>
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Generating...
+          </>
+        ) : (
+          <>
+            <Sparkles className="w-4 h-4" />
+            Generate Tailored CV
+          </>
+        )}
+      </button>
+    </form>
   )
 }
