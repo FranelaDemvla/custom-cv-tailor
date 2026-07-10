@@ -1,51 +1,62 @@
 import { useState, useRef, useCallback } from 'react'
+import type { ChangeEvent, DragEvent, FormEvent } from 'react'
 import { Upload, FileText, Loader2, AlertCircle, Sparkles } from 'lucide-react'
 import { clsx } from 'clsx'
 import { parseCVFile } from '../services/parserService'
 
-export default function InputPanel({ cvText, jdText, onCvChange, onJdChange, onGenerate, canGenerate, isGenerating }) {
-  const [isParsing, setIsParsing] = useState(false)
-  const [parseError, setParseError] = useState(null)
-  const [isDragging, setIsDragging] = useState(false)
-  const fileInputRef = useRef(null)
+interface InputPanelProps {
+  cvText: string;
+  jdText: string;
+  onCvChange: (text: string) => void;
+  onJdChange: (text: string) => void;
+  onGenerate: () => void;
+  canGenerate: boolean;
+  isGenerating: boolean;
+}
 
-  const handleFile = useCallback(async (file) => {
+export default function InputPanel({ cvText, jdText, onCvChange, onJdChange, onGenerate, canGenerate, isGenerating }: InputPanelProps) {
+  const [isParsing, setIsParsing] = useState(false)
+  const [parseError, setParseError] = useState<string | null>(null)
+  const [isDragging, setIsDragging] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleFile = useCallback(async (file: File) => {
     setIsParsing(true)
     setParseError(null)
     try {
       const text = await parseCVFile(file)
       onCvChange(text)
     } catch (err) {
-      setParseError(err.message || 'Failed to parse file')
+      setParseError(err instanceof Error ? err.message : 'Failed to parse file')
     } finally {
       setIsParsing(false)
     }
   }, [onCvChange])
 
-  const handleDrop = useCallback((e) => {
+  const handleDrop = useCallback((e: DragEvent<HTMLDivElement>) => {
     e.preventDefault()
     setIsDragging(false)
     const file = e.dataTransfer.files[0]
     if (file) handleFile(file)
   }, [handleFile])
 
-  const handleDragOver = useCallback((e) => {
+  const handleDragOver = useCallback((e: DragEvent<HTMLDivElement>) => {
     e.preventDefault()
     setIsDragging(true)
   }, [])
 
-  const handleDragLeave = useCallback((e) => {
+  const handleDragLeave = useCallback((e: DragEvent<HTMLDivElement>) => {
     e.preventDefault()
     setIsDragging(false)
   }, [])
 
-  const handleFileSelect = useCallback((e) => {
-    const file = e.target.files[0]
+  const handleFileSelect = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
     if (file) handleFile(file)
     e.target.value = ''
   }, [handleFile])
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (canGenerate) onGenerate()
   }
@@ -105,7 +116,7 @@ export default function InputPanel({ cvText, jdText, onCvChange, onJdChange, onG
         </label>
         <textarea
           value={cvText}
-          onChange={(e) => onCvChange(e.target.value)}
+          onChange={(e: ChangeEvent<HTMLTextAreaElement>) => onCvChange(e.target.value)}
           placeholder="Paste your CV here, or upload a file above..."
           rows={10}
           className="w-full rounded-lg border border-surface-200 bg-surface-50 p-3 text-sm text-surface-800 placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-y"
@@ -119,7 +130,7 @@ export default function InputPanel({ cvText, jdText, onCvChange, onJdChange, onG
         </label>
         <textarea
           value={jdText}
-          onChange={(e) => onJdChange(e.target.value)}
+          onChange={(e: ChangeEvent<HTMLTextAreaElement>) => onJdChange(e.target.value)}
           placeholder="Paste the job description here..."
           rows={10}
           className="w-full rounded-lg border border-surface-200 bg-surface-50 p-3 text-sm text-surface-800 placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-y"

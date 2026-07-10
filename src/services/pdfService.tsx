@@ -1,7 +1,8 @@
 import { pdf } from '@react-pdf/renderer'
 import ResumeTemplate from '../templates/ResumeTemplate'
+import type { ResumeData } from '../types'
 
-export async function generatePDF(data) {
+export async function generatePDF(data: ResumeData): Promise<void> {
   if (!data) {
     throw new Error('No resume data provided')
   }
@@ -17,7 +18,7 @@ export async function generatePDF(data) {
   URL.revokeObjectURL(url)
 }
 
-function sanitizeFileName(name) {
+function sanitizeFileName(name: string): string {
   return name
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')

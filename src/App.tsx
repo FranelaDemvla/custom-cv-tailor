@@ -4,6 +4,7 @@ import InputPanel from './components/InputPanel'
 import PreviewPanel from './components/PreviewPanel'
 import { tailorCV } from './services/openaiService'
 import { generatePDF } from './services/pdfService'
+import type { ResumeData, Status, Model } from './types'
 
 const LOADING_STEPS = [
   'Analyzing job description...',
@@ -12,7 +13,7 @@ const LOADING_STEPS = [
   'Structuring tailored resume...',
 ]
 
-function getDefaultModel() {
+function getDefaultModel(): Model {
   if (import.meta.env.VITE_LLM_BASE_URL) return 'local'
   if (import.meta.env.VITE_OPENAI_API_KEY) return 'openai'
   return 'local'
@@ -21,11 +22,11 @@ function getDefaultModel() {
 export default function App() {
   const [cvText, setCvText] = useState('')
   const [jdText, setJdText] = useState('')
-  const [status, setStatus] = useState('idle')
+  const [status, setStatus] = useState<Status>('idle')
   const [stepIndex, setStepIndex] = useState(0)
-  const [resumeData, setResumeData] = useState(null)
-  const [error, setError] = useState(null)
-  const [model, setModel] = useState(getDefaultModel)
+  const [resumeData, setResumeData] = useState<ResumeData | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [model, setModel] = useState<Model>(getDefaultModel)
 
   const handleGenerate = useCallback(async () => {
     setError(null)
@@ -48,7 +49,7 @@ export default function App() {
       setStatus('success')
     } catch (err) {
       clearInterval(stepTimer)
-      setError(err.message || 'An unexpected error occurred')
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred')
       setStatus('error')
     }
   }, [cvText, jdText, model])
@@ -58,7 +59,7 @@ export default function App() {
     try {
       await generatePDF(resumeData)
     } catch (err) {
-      setError(err.message || 'Failed to generate PDF')
+      setError(err instanceof Error ? err.message : 'Failed to generate PDF')
       setStatus('error')
     }
   }, [resumeData])

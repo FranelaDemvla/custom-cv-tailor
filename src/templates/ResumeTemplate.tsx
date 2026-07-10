@@ -1,4 +1,5 @@
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
+import type { ExperienceItem, ResumeData } from '../types'
 
 const styles = StyleSheet.create({
   page: {
@@ -102,7 +103,7 @@ const MAX_SKILLS = 12
 const MAX_EDUCATION = 3
 const MAX_SUMMARY_LENGTH = 500
 
-function ExperienceItem({ exp }) {
+function ExperienceItem({ exp }: { exp: ExperienceItem }) {
   const bullets = exp.bullets?.slice(0, MAX_BULLETS_PER_ROLE) || []
   return (
     <View>
@@ -122,7 +123,7 @@ function ExperienceItem({ exp }) {
   )
 }
 
-function sanitize(str) {
+function sanitize(str: unknown): string {
   if (!str) return ''
   return String(str)
     .replace(/\u2013|\u2014/g, '-')
@@ -131,7 +132,11 @@ function sanitize(str) {
     .replace(/[\u200B\u00A0]/g, ' ')
 }
 
-export default function ResumeTemplate({ data }) {
+interface ResumeTemplateProps {
+  data: ResumeData;
+}
+
+export default function ResumeTemplate({ data }: ResumeTemplateProps) {
   if (!data) return null
 
   const contact = data.contact || {}

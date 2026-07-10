@@ -1,6 +1,13 @@
+import type { ChangeEvent } from 'react'
 import { FileText, Cpu } from 'lucide-react'
+import type { Model } from '../types'
 
-export default function Header({ model, onModelChange }) {
+interface HeaderProps {
+  model: Model;
+  onModelChange: (model: Model) => void;
+}
+
+export default function Header({ model, onModelChange }: HeaderProps) {
   return (
     <header className="border-b border-surface-200 bg-white">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center gap-3">
@@ -11,7 +18,7 @@ export default function Header({ model, onModelChange }) {
           <Cpu className="w-4 h-4 text-surface-400" />
           <select
             value={model}
-            onChange={(e) => onModelChange(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLSelectElement>) => onModelChange(e.target.value as Model)}
             className="text-sm border border-surface-200 rounded-lg px-3 py-1.5 bg-surface-50 text-surface-700 focus:outline-none focus:ring-2 focus:ring-brand-500"
           >
             <option value="local">Local Model</option>

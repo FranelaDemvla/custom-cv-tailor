@@ -1,6 +1,6 @@
 import mammoth from 'mammoth'
 
-function cleanText(text) {
+function cleanText(text: string): string {
   return text
     .replace(/\r\n/g, '\n')
     .replace(/\n{3,}/g, '\n\n')
@@ -9,15 +9,30 @@ function cleanText(text) {
     .trim()
 }
 
-export async function parseDocx(file) {
+export async function parseDocx(file: File): Promise<string> {
   const buffer = await file.arrayBuffer()
   const result = await mammoth.extractRawText({ arrayBuffer: buffer })
   return cleanText(result.value)
 }
 
-export async function parsePdf(file) {
+export async function parsePdf(file: File): Promise<string> {
   const buffer = await file.arrayBuffer()
-  const pdfjsLib = await import('pdfjs-dist')
+
+  interface PDFJSLib {
+    GlobalWorkerOptions: { workerSrc: string };
+    getDocument: (options: { data: Uint8Array }) => { promise: Promise<PDFDocumentProxy> };
+  }
+
+  interface PDFDocumentProxy {
+    numPages: number;
+    getPage: (pageNumber: number) => Promise<PDFPageProxy>;
+  }
+
+  interface PDFPageProxy {
+    getTextContent: () => Promise<{ items: Array<{ str: string }> }>;
+  }
+
+  const pdfjsLib = await import('pdfjs-dist') as unknown as PDFJSLib
 
   pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
     'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -25,7 +40,7 @@ export async function parsePdf(file) {
   ).toString()
 
   const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buffer) }).promise
-  const pages = []
+  const pages: string[] = []
   for (let i = 1; i <= pdf.numPages; i++) {
     const page = await pdf.getPage(i)
     const content = await page.getTextContent()
@@ -36,8 +51,8 @@ export async function parsePdf(file) {
   return cleanText(pages.join('\n\n'))
 }
 
-export async function parseCVFile(file) {
-  const ext = file.name.split('.').pop().toLowerCase()
+export async function parseCVFile(file: File): Promise<string> {
+  const ext = file.name.split('.').pop()?.toLowerCase()
   if (ext === 'docx') return parseDocx(file)
   if (ext === 'pdf') return parsePdf(file)
   throw new Error(`Unsupported file type: .${ext}. Please upload a .docx or .pdf file.`)

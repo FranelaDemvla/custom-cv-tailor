@@ -1,7 +1,14 @@
+
 import { Loader2, CheckCircle2, Download, AlertCircle, FileText, ArrowLeft } from 'lucide-react'
 import { clsx } from 'clsx'
+import type { ResumeData, Status } from '../types'
 
-function LoadingState({ stepIndex, loadingSteps }) {
+interface LoadingStateProps {
+  stepIndex: number;
+  loadingSteps: string[];
+}
+
+function LoadingState({ stepIndex, loadingSteps }: LoadingStateProps) {
   return (
     <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
       <Loader2 className="w-12 h-12 text-brand-500 animate-spin mb-6" />
@@ -41,7 +48,13 @@ function LoadingState({ stepIndex, loadingSteps }) {
   )
 }
 
-function SuccessState({ resumeData, onDownload, onReset }) {
+interface SuccessStateProps {
+  resumeData: ResumeData;
+  onDownload: () => void;
+  onReset: () => void;
+}
+
+function SuccessState({ resumeData, onDownload, onReset }: SuccessStateProps) {
   const contact = resumeData?.contact || {}
   const expCount = resumeData?.experience?.length || 0
   const skillCount = resumeData?.skills?.length || 0
@@ -90,7 +103,12 @@ function SuccessState({ resumeData, onDownload, onReset }) {
   )
 }
 
-function ErrorState({ error, onReset }) {
+interface ErrorStateProps {
+  error: string;
+  onReset: () => void;
+}
+
+function ErrorState({ error, onReset }: ErrorStateProps) {
   const isKeyError = error?.toLowerCase().includes('api key')
 
   return (
@@ -132,15 +150,25 @@ function IdleState() {
   )
 }
 
-export default function PreviewPanel({ status, stepIndex, loadingSteps, resumeData, error, onDownload, onReset }) {
+interface PreviewPanelProps {
+  status: Status;
+  stepIndex: number;
+  loadingSteps: string[];
+  resumeData: ResumeData | null;
+  error: string | null;
+  onDownload: () => void;
+  onReset: () => void;
+}
+
+export default function PreviewPanel({ status, stepIndex, loadingSteps, resumeData, error, onDownload, onReset }: PreviewPanelProps) {
   return (
-    <div className="bg-white rounded-xl border border-surface-200 p-6 min-h-[500px] flex flex-col">
+    <div className="bg-white rounded-xl border border-surface-200 p-6 min-h-125 flex flex-col">
       <h2 className="text-lg font-semibold text-surface-900 mb-4">Preview</h2>
       <div className="flex-1 flex flex-col justify-center">
         {status === 'idle' && <IdleState />}
         {status === 'generating' && <LoadingState stepIndex={stepIndex} loadingSteps={loadingSteps} />}
-        {status === 'success' && <SuccessState resumeData={resumeData} onDownload={onDownload} onReset={onReset} />}
-        {status === 'error' && <ErrorState error={error} onReset={onReset} />}
+        {status === 'success' && resumeData && <SuccessState resumeData={resumeData} onDownload={onDownload} onReset={onReset} />}
+        {status === 'error' && error && <ErrorState error={error} onReset={onReset} />}
       </div>
     </div>
   )
