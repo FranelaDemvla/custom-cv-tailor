@@ -1,77 +1,79 @@
-import { useState, useCallback } from 'react'
-import Header from './components/Header'
-import InputPanel from './components/InputPanel'
-import PreviewPanel from './components/PreviewPanel'
-import { tailorCV } from './services/openaiService'
-import { generatePDF } from './services/pdfService'
-import type { ResumeData, Status, Model } from './types'
+import { useState, useCallback } from "react";
+import Header from "./components/Header";
+import InputPanel from "./components/InputPanel";
+import PreviewPanel from "./components/PreviewPanel";
+import { tailorCV } from "./services/openaiService";
+import { generatePDF } from "./services/pdfService";
+import type { ResumeData, Status, Model } from "./types";
 
 const LOADING_STEPS = [
-  'Analyzing job description...',
-  'Matching keywords and skills...',
-  'Optimizing experience bullet points...',
-  'Structuring tailored resume...',
-]
+  "Analyzing job description...",
+  "Matching keywords and skills...",
+  "Optimizing experience bullet points...",
+  "Structuring tailored resume...",
+];
 
 function getDefaultModel(): Model {
-  if (import.meta.env.VITE_LLM_BASE_URL) return 'local'
-  if (import.meta.env.VITE_OPENAI_API_KEY) return 'openai'
-  return 'local'
+  if (import.meta.env.VITE_LLM_BASE_URL) return "local";
+  if (import.meta.env.VITE_OPENAI_API_KEY) return "openai";
+  return "local";
 }
 
 export default function App() {
-  const [cvText, setCvText] = useState('')
-  const [jdText, setJdText] = useState('')
-  const [status, setStatus] = useState<Status>('idle')
-  const [stepIndex, setStepIndex] = useState(0)
-  const [resumeData, setResumeData] = useState<ResumeData | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const [model, setModel] = useState<Model>(getDefaultModel)
+  const [cvText, setCvText] = useState("");
+  const [jdText, setJdText] = useState("");
+  const [status, setStatus] = useState<Status>("idle");
+  const [stepIndex, setStepIndex] = useState(0);
+  const [resumeData, setResumeData] = useState<ResumeData | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [model, setModel] = useState<Model>(getDefaultModel);
 
   const handleGenerate = useCallback(async () => {
-    setError(null)
-    setResumeData(null)
-    setStatus('generating')
-    setStepIndex(0)
+    setError(null);
+    setResumeData(null);
+    setStatus("generating");
+    setStepIndex(0);
 
     const stepTimer = setInterval(() => {
       setStepIndex((prev) => {
-        if (prev < LOADING_STEPS.length - 1) return prev + 1
-        return prev
-      })
-    }, 1500)
+        if (prev < LOADING_STEPS.length - 1) return prev + 1;
+        return prev;
+      });
+    }, 1500);
 
     try {
-      const data = await tailorCV(cvText, jdText, model)
-      clearInterval(stepTimer)
-      setStepIndex(LOADING_STEPS.length)
-      setResumeData(data)
-      setStatus('success')
+      const data = await tailorCV(cvText, jdText, model);
+      clearInterval(stepTimer);
+      setStepIndex(LOADING_STEPS.length);
+      setResumeData(data);
+      setStatus("success");
     } catch (err) {
-      clearInterval(stepTimer)
-      setError(err instanceof Error ? err.message : 'An unexpected error occurred')
-      setStatus('error')
+      clearInterval(stepTimer);
+      setError(
+        err instanceof Error ? err.message : "An unexpected error occurred",
+      );
+      setStatus("error");
     }
-  }, [cvText, jdText, model])
+  }, [cvText, jdText, model]);
 
   const handleDownload = useCallback(async () => {
-    if (!resumeData) return
+    if (!resumeData) return;
     try {
-      await generatePDF(resumeData)
+      await generatePDF(resumeData);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to generate PDF')
-      setStatus('error')
+      setError(err instanceof Error ? err.message : "Failed to generate PDF");
+      setStatus("error");
     }
-  }, [resumeData])
+  }, [resumeData]);
 
   const handleReset = useCallback(() => {
-    setStatus('idle')
-    setResumeData(null)
-    setError(null)
-    setStepIndex(0)
-  }, [])
+    setStatus("idle");
+    setResumeData(null);
+    setError(null);
+    setStepIndex(0);
+  }, []);
 
-  const canGenerate = cvText.trim() && jdText.trim() && status !== 'generating'
+  const canGenerate = !!cvText.trim() && status !== "generating";
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -85,7 +87,7 @@ export default function App() {
             onJdChange={setJdText}
             onGenerate={handleGenerate}
             canGenerate={canGenerate}
-            isGenerating={status === 'generating'}
+            isGenerating={status === "generating"}
           />
         </div>
         <div className="flex-1 min-w-0">
@@ -101,5 +103,5 @@ export default function App() {
         </div>
       </main>
     </div>
-  )
+  );
 }

@@ -1,8 +1,8 @@
-import { useState, useRef, useCallback } from 'react'
-import type { ChangeEvent, DragEvent, FormEvent } from 'react'
-import { Upload, FileText, Loader2, AlertCircle, Sparkles } from 'lucide-react'
-import { clsx } from 'clsx'
-import { parseCVFile } from '../services/parserService'
+import { useState, useRef, useCallback } from "react";
+import type { ChangeEvent, DragEvent, FormEvent } from "react";
+import { Upload, FileText, Loader2, AlertCircle, Sparkles } from "lucide-react";
+import { clsx } from "clsx";
+import { parseCVFile } from "../services/parserService";
 
 interface InputPanelProps {
   cvText: string;
@@ -14,69 +14,95 @@ interface InputPanelProps {
   isGenerating: boolean;
 }
 
-export default function InputPanel({ cvText, jdText, onCvChange, onJdChange, onGenerate, canGenerate, isGenerating }: InputPanelProps) {
-  const [isParsing, setIsParsing] = useState(false)
-  const [parseError, setParseError] = useState<string | null>(null)
-  const [isDragging, setIsDragging] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+export default function InputPanel({
+  cvText,
+  jdText,
+  onCvChange,
+  onJdChange,
+  onGenerate,
+  canGenerate,
+  isGenerating,
+}: InputPanelProps) {
+  const [isParsing, setIsParsing] = useState(false);
+  const [parseError, setParseError] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFile = useCallback(async (file: File) => {
-    setIsParsing(true)
-    setParseError(null)
-    try {
-      const text = await parseCVFile(file)
-      onCvChange(text)
-    } catch (err) {
-      setParseError(err instanceof Error ? err.message : 'Failed to parse file')
-    } finally {
-      setIsParsing(false)
-    }
-  }, [onCvChange])
+  const handleFile = useCallback(
+    async (file: File) => {
+      setIsParsing(true);
+      setParseError(null);
+      try {
+        const text = await parseCVFile(file);
+        onCvChange(text);
+      } catch (err) {
+        setParseError(
+          err instanceof Error ? err.message : "Failed to parse file",
+        );
+      } finally {
+        setIsParsing(false);
+      }
+    },
+    [onCvChange],
+  );
 
-  const handleDrop = useCallback((e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    setIsDragging(false)
-    const file = e.dataTransfer.files[0]
-    if (file) handleFile(file)
-  }, [handleFile])
+  const handleDrop = useCallback(
+    (e: DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      setIsDragging(false);
+      const file = e.dataTransfer.files[0];
+      if (file) handleFile(file);
+    },
+    [handleFile],
+  );
 
   const handleDragOver = useCallback((e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    setIsDragging(true)
-  }, [])
+    e.preventDefault();
+    setIsDragging(true);
+  }, []);
 
   const handleDragLeave = useCallback((e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    setIsDragging(false)
-  }, [])
+    e.preventDefault();
+    setIsDragging(false);
+  }, []);
 
-  const handleFileSelect = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) handleFile(file)
-    e.target.value = ''
-  }, [handleFile])
+  const handleFileSelect = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) handleFile(file);
+      e.target.value = "";
+    },
+    [handleFile],
+  );
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    if (canGenerate) onGenerate()
-  }
+    e.preventDefault();
+    if (canGenerate) onGenerate();
+  };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-surface-200 p-6 space-y-6">
-      <h2 className="text-lg font-semibold text-surface-900">Your CV & Job Description</h2>
+    <form
+      onSubmit={handleSubmit}
+      className="bg-white rounded-xl border border-surface-200 p-6 space-y-6"
+    >
+      <h2 className="text-lg font-semibold text-surface-900">
+        Your CV & Job Description
+      </h2>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium text-surface-700">Upload CV (.docx / .pdf)</label>
+        <label className="text-sm font-medium text-surface-700">
+          Upload CV (.docx / .pdf)
+        </label>
         <div
           onDrop={handleDrop}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onClick={() => fileInputRef.current?.click()}
           className={clsx(
-            'border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors',
+            "border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors",
             isDragging
-              ? 'border-brand-500 bg-brand-50'
-              : 'border-surface-200 hover:border-surface-300 hover:bg-surface-50'
+              ? "border-brand-500 bg-brand-50"
+              : "border-surface-200 hover:border-surface-300 hover:bg-surface-50",
           )}
         >
           {isParsing ? (
@@ -88,9 +114,12 @@ export default function InputPanel({ cvText, jdText, onCvChange, onJdChange, onG
             <div className="flex flex-col items-center gap-2">
               <Upload className="w-8 h-8 text-surface-400" />
               <span className="text-sm text-surface-500">
-                Drop your CV here or <span className="text-brand-600 font-medium">browse</span>
+                Drop your CV here or{" "}
+                <span className="text-brand-600 font-medium">browse</span>
               </span>
-              <span className="text-xs text-surface-400">Supports .docx and .pdf</span>
+              <span className="text-xs text-surface-400">
+                Supports .docx and .pdf
+              </span>
             </div>
           )}
           <input
@@ -116,7 +145,9 @@ export default function InputPanel({ cvText, jdText, onCvChange, onJdChange, onG
         </label>
         <textarea
           value={cvText}
-          onChange={(e: ChangeEvent<HTMLTextAreaElement>) => onCvChange(e.target.value)}
+          onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+            onCvChange(e.target.value)
+          }
           placeholder="Paste your CV here, or upload a file above..."
           rows={10}
           className="w-full rounded-lg border border-surface-200 bg-surface-50 p-3 text-sm text-surface-800 placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-y"
@@ -126,12 +157,14 @@ export default function InputPanel({ cvText, jdText, onCvChange, onJdChange, onG
       <div className="space-y-2">
         <label className="text-sm font-medium text-surface-700 flex items-center gap-2">
           <FileText className="w-4 h-4" />
-          Job Description
+          Job Description (optional)
         </label>
         <textarea
           value={jdText}
-          onChange={(e: ChangeEvent<HTMLTextAreaElement>) => onJdChange(e.target.value)}
-          placeholder="Paste the job description here..."
+          onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+            onJdChange(e.target.value)
+          }
+          placeholder="Paste the job description here, or leave empty to just run the CV text through the optimizer."
           rows={10}
           className="w-full rounded-lg border border-surface-200 bg-surface-50 p-3 text-sm text-surface-800 placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-y"
         />
@@ -141,10 +174,10 @@ export default function InputPanel({ cvText, jdText, onCvChange, onJdChange, onG
         type="submit"
         disabled={!canGenerate}
         className={clsx(
-          'w-full py-3 rounded-lg font-medium text-sm flex items-center justify-center gap-2 transition-colors',
+          "w-full py-3 rounded-lg font-medium text-sm flex items-center justify-center gap-2 transition-colors",
           canGenerate
-            ? 'bg-brand-600 text-white hover:bg-brand-700 cursor-pointer'
-            : 'bg-surface-200 text-surface-400 cursor-not-allowed'
+            ? "bg-brand-600 text-white hover:bg-brand-700 cursor-pointer"
+            : "bg-surface-200 text-surface-400 cursor-not-allowed",
         )}
       >
         {isGenerating ? (
@@ -160,5 +193,5 @@ export default function InputPanel({ cvText, jdText, onCvChange, onJdChange, onG
         )}
       </button>
     </form>
-  )
+  );
 }
