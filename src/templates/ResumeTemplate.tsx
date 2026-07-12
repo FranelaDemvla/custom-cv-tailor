@@ -1,5 +1,6 @@
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 import type { ExperienceItem, ResumeData } from "../types";
+import { sanitize } from "../lib/sanitize";
 
 const styles = StyleSheet.create({
   page: {
@@ -98,7 +99,6 @@ const styles = StyleSheet.create({
 
 const MAX_EXPERIENCE = 4;
 const MAX_BULLETS_PER_ROLE = 4;
-const MAX_SKILLS = 12;
 const MAX_EDUCATION = 3;
 const MAX_SUMMARY_LENGTH = 500;
 
@@ -122,15 +122,6 @@ function ExperienceItem({ exp }: { exp: ExperienceItem }) {
   );
 }
 
-function sanitize(str: unknown): string {
-  if (!str) return "";
-  return String(str)
-    .replace(/\u2013|\u2014/g, "-")
-    .replace(/\u2018|\u2019/g, "'")
-    .replace(/\u201C|\u201D/g, '"')
-    .replace(/[\u200B\u00A0]/g, " ");
-}
-
 interface ResumeTemplateProps {
   data: ResumeData;
 }
@@ -140,7 +131,7 @@ export default function ResumeTemplate({ data }: ResumeTemplateProps) {
 
   const contact = data.contact || {};
   const experience = (data.experience || []).slice(0, MAX_EXPERIENCE);
-  const skills = (data.skills || []).slice(0, MAX_SKILLS);
+  const skills = data.skills || [];
   const education = (data.education || []).slice(0, MAX_EDUCATION);
   const summary = (data.summary || "").slice(0, MAX_SUMMARY_LENGTH);
 

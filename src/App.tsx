@@ -99,6 +99,7 @@ export default function App() {
             error={error}
             onDownload={handleDownload}
             onReset={handleReset}
+            onDataChange={setResumeData}
           />
         </div>
       </main>

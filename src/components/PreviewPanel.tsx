@@ -1,6 +1,7 @@
 
-import { Loader2, CheckCircle2, Download, AlertCircle, FileText, ArrowLeft } from 'lucide-react'
+import { Loader2, CheckCircle2, AlertCircle, FileText, ArrowLeft } from 'lucide-react'
 import { clsx } from 'clsx'
+import EditableResumePreview from './EditableResumePreview'
 import type { ResumeData, Status } from '../types'
 
 interface LoadingStateProps {
@@ -44,61 +45,6 @@ function LoadingState({ stepIndex, loadingSteps }: LoadingStateProps) {
           </div>
         ))}
       </div>
-    </div>
-  )
-}
-
-interface SuccessStateProps {
-  resumeData: ResumeData;
-  onDownload: () => void;
-  onReset: () => void;
-}
-
-function SuccessState({ resumeData, onDownload, onReset }: SuccessStateProps) {
-  const contact = resumeData?.contact || {}
-  const expCount = resumeData?.experience?.length || 0
-  const skillCount = resumeData?.skills?.length || 0
-
-  return (
-    <div className="flex flex-col items-center py-8 px-6 text-center">
-      <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center mb-4">
-        <CheckCircle2 className="w-8 h-8 text-green-600" />
-      </div>
-      <h3 className="text-lg font-semibold text-surface-900 mb-1">CV Tailored Successfully</h3>
-      <p className="text-sm text-surface-500 mb-6">
-        Your resume has been optimized for the job description.
-      </p>
-
-      <div className="grid grid-cols-3 gap-4 w-full mb-8">
-        <div className="bg-surface-50 rounded-lg p-3">
-          <div className="text-lg font-semibold text-brand-600">{contact.name ? '✓' : '—'}</div>
-          <div className="text-xs text-surface-500 mt-1">Contact</div>
-        </div>
-        <div className="bg-surface-50 rounded-lg p-3">
-          <div className="text-lg font-semibold text-brand-600">{expCount}</div>
-          <div className="text-xs text-surface-500 mt-1">Positions</div>
-        </div>
-        <div className="bg-surface-50 rounded-lg p-3">
-          <div className="text-lg font-semibold text-brand-600">{skillCount}</div>
-          <div className="text-xs text-surface-500 mt-1">Skills</div>
-        </div>
-      </div>
-
-      <button
-        onClick={onDownload}
-        className="w-full py-3 rounded-lg bg-brand-600 text-white font-medium text-sm flex items-center justify-center gap-2 hover:bg-brand-700 transition-colors mb-3"
-      >
-        <Download className="w-4 h-4" />
-        Download PDF
-      </button>
-
-      <button
-        onClick={onReset}
-        className="text-sm text-surface-500 hover:text-surface-700 flex items-center gap-1 transition-colors"
-      >
-        <ArrowLeft className="w-3.5 h-3.5" />
-        Tailor another CV
-      </button>
     </div>
   )
 }
@@ -158,16 +104,24 @@ interface PreviewPanelProps {
   error: string | null;
   onDownload: () => void;
   onReset: () => void;
+  onDataChange: (data: ResumeData) => void;
 }
 
-export default function PreviewPanel({ status, stepIndex, loadingSteps, resumeData, error, onDownload, onReset }: PreviewPanelProps) {
+export default function PreviewPanel({ status, stepIndex, loadingSteps, resumeData, error, onDownload, onReset, onDataChange }: PreviewPanelProps) {
   return (
-    <div className="bg-white rounded-xl border border-surface-200 p-6 min-h-125 flex flex-col">
-      <h2 className="text-lg font-semibold text-surface-900 mb-4">Preview</h2>
-      <div className="flex-1 flex flex-col justify-center">
+    <div className="bg-white rounded-xl border border-surface-200 p-6 flex flex-col">
+      <h2 className="text-lg font-semibold text-surface-900 mb-4 shrink-0">Preview</h2>
+      <div className="flex-1 flex flex-col min-h-0">
         {status === 'idle' && <IdleState />}
         {status === 'generating' && <LoadingState stepIndex={stepIndex} loadingSteps={loadingSteps} />}
-        {status === 'success' && resumeData && <SuccessState resumeData={resumeData} onDownload={onDownload} onReset={onReset} />}
+        {status === 'success' && resumeData && (
+          <EditableResumePreview
+            resumeData={resumeData}
+            onDataChange={onDataChange}
+            onDownload={onDownload}
+            onReset={onReset}
+          />
+        )}
         {status === 'error' && error && <ErrorState error={error} onReset={onReset} />}
       </div>
     </div>
