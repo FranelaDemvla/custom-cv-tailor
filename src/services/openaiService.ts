@@ -4,9 +4,9 @@ import type { ResumeData, Model } from "../types";
 const JSON_SCHEMA = {
   contact: { name: "", email: "", phone: "", location: "" },
   summary: "",
-  experience: [] as unknown[],
-  skills: [] as string[],
-  education: [] as unknown[],
+  experience: [{ role: "", company: "", dates: "", bullets: [""] }],
+  skills: [""],
+  education: [{ institution: "", degree: "", year: "" }],
 };
 
 const SYSTEM_PROMPT_BASE = `You are an expert CV/resume assistant. Your task is to process a candidate's CV into a clean, structured format.
