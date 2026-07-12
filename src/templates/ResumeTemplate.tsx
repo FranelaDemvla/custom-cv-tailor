@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     gap: 12,
-    marginVertical: 12,
+    marginVertical: 4,
     fontSize: 9,
     color: "#444",
   },
@@ -138,6 +138,7 @@ export default function ResumeTemplate({ data }: ResumeTemplateProps) {
   const contactParts = [contact.email, contact.phone, contact.location].filter(
     Boolean,
   );
+  const profiles = contact.profiles || [];
 
   return (
     <Document>
@@ -146,6 +147,13 @@ export default function ResumeTemplate({ data }: ResumeTemplateProps) {
         {contactParts.length > 0 && (
           <View style={styles.contactRow}>
             <Text>{contactParts.join("  |  ")}</Text>
+          </View>
+        )}
+        {profiles.length > 0 && (
+          <View style={styles.contactRow}>
+            <Text>
+              {profiles.map((p) => `${p.platform}: ${p.url}`).join("  |  ")}
+            </Text>
           </View>
         )}
         <View style={styles.divider} />

@@ -2,7 +2,7 @@ import OpenAI from "openai";
 import type { ResumeData, Model } from "../types";
 
 const JSON_SCHEMA = {
-  contact: { name: "", email: "", phone: "", location: "" },
+  contact: { name: "", email: "", phone: "", location: "", profiles: [{ platform: "", url: "" }] },
   summary: "",
   experience: [{ role: "", company: "", dates: "", bullets: [""] }],
   skills: [""],

@@ -20,6 +20,7 @@ export default function VisualPreview({ data }: { data: ResumeData }) {
   const contactParts = [contact.email, contact.phone, contact.location].filter(
     Boolean,
   );
+  const profiles = contact.profiles || [];
   const experience = (data.experience || []).slice(0, 4);
   const skills = data.skills || [];
   const education = (data.education || []).slice(0, 3);
@@ -54,12 +55,32 @@ export default function VisualPreview({ data }: { data: ResumeData }) {
                 justifyContent: "center",
                 gap: 12,
                 marginTop: 12,
-                marginBottom: 12,
+                marginBottom: profiles.length > 0 ? 4 : 12,
                 fontSize: 9,
                 color: "#444",
               }}
             >
               {contactParts.join("  |  ")}
+            </div>
+          )}
+
+          {profiles.length > 0 && (
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "center",
+                gap: 12,
+                marginBottom: 12,
+                fontSize: 9,
+                color: "#444",
+              }}
+            >
+              {profiles.map((p, i) => (
+                <span key={i}>
+                  {sanitize(p.platform)}: {sanitize(p.url)}
+                </span>
+              ))}
             </div>
           )}
 

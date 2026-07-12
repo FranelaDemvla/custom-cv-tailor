@@ -1,8 +1,14 @@
+export interface ProfileLink {
+  platform?: string;
+  url?: string;
+}
+
 export interface Contact {
   name?: string;
   email?: string;
   phone?: string;
   location?: string;
+  profiles?: ProfileLink[];
 }
 
 export interface ExperienceItem {
