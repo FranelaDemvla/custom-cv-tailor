@@ -1,0 +1,131 @@
+{
+  "common": {
+    "app": {
+      "title": "ATS CV Tailor",
+      "subtitle": "Optimización de CV con IA"
+    },
+    "models": {
+      "local": "Modelo Local",
+      "gpt4o": "GPT-4o"
+    },
+    "inputPanel": {
+      "heading": "Tu CV y Oferta de Trabajo",
+      "uploadLabel": "Subir CV (.docx / .pdf)",
+      "parsingFile": "Analizando archivo...",
+      "dropHere": "Suelta tu CV aquí o ",
+      "browse": "explorar",
+      "supportsFormats": "Formatos: .docx y .pdf",
+      "cvLabel": "Texto del CV",
+      "cvPlaceholder": "Pega tu CV aquí, o sube un archivo arriba...",
+      "jdLabel": "Oferta de trabajo (opcional)",
+      "jdPlaceholder": "Pega la descripción del puesto aquí, o déjalo vacío para solo optimizar el CV.",
+      "generate": "Generar CV Personalizado",
+      "generating": "Generando..."
+    },
+    "preview": {
+      "heading": "Vista previa",
+      "idleTitle": "CV Optimizado para ATS",
+      "idleDescription": "Introduce tu CV y una oferta de trabajo a la izquierda, luego haz clic en Generar para crear un CV personalizado.",
+      "apiKeyRequired": "API Key Requerida",
+      "generationFailed": "Error de Generación",
+      "apiKeyHelp": "Configura VITE_OPENAI_API_KEY en tu archivo .env, o configura VITE_LLM_BASE_URL para un modelo local.",
+      "tryAgain": "Intentar de nuevo",
+      "editor": "Editor",
+      "preview": "Vista previa",
+      "downloadPDF": "Descargar PDF",
+      "tailorAnother": "Personalizar otro CV"
+    },
+    "loading": {
+      "step1": "Analizando oferta de trabajo...",
+      "step2": "Emparejando palabras clave y habilidades...",
+      "step3": "Optimizando puntos de experiencia...",
+      "step4": "Estructurando CV personalizado..."
+    },
+    "errors": {
+      "generic": "Ocurrió un error inesperado",
+      "pdfFailed": "Error al generar PDF",
+      "cvRequired": "El texto del CV es obligatorio",
+      "apiKeyRequired": "API key requerida. Configura VITE_OPENAI_API_KEY para OpenAI o VITE_LLM_BASE_URL para un modelo local.",
+      "openaiKeyNotConfigured": "API key de OpenAI no configurada. Configura VITE_OPENAI_API_KEY en tu archivo .env.",
+      "emptyResponse": "Respuesta vacía del LLM",
+      "parseFailed": "Error al analizar la respuesta del LLM como JSON. El modelo puede haber devuelto un formato inesperado.",
+      "invalidObject": "Respuesta inválida: no es un objeto JSON",
+      "missingField": "Respuesta inválida: falta el campo obligatorio \"{{key}}\"",
+      "contactMustBeObject": "Respuesta inválida: \"contact\" debe ser un objeto",
+      "summaryMustBeString": "Respuesta inválida: \"summary\" debe ser un string",
+      "experienceMustBeArray": "Respuesta inválida: \"experience\" debe ser un array",
+      "skillsMustBeArray": "Respuesta inválida: \"skills\" debe ser un array",
+      "educationMustBeArray": "Respuesta inválida: \"education\" debe ser un array",
+      "unsupportedFile": "Tipo de archivo no soportado: .{{ext}}. Por favor sube un archivo .docx o .pdf.",
+      "fileParseFailed": "Error al analizar archivo",
+      "noResumeData": "No se proporcionaron datos del CV"
+    },
+    "language": {
+      "label": "Idioma",
+      "en": "English",
+      "es": "Spanish"
+    }
+  },
+  "editor": {
+    "contact": {
+      "label": "Contacto",
+      "name": "Nombre",
+      "namePlaceholder": "Nombre completo",
+      "email": "Email",
+      "emailPlaceholder": "email@ejemplo.com",
+      "phone": "Teléfono",
+      "phonePlaceholder": "+34 600 000 000",
+      "location": "Ubicación",
+      "locationPlaceholder": "Ciudad, Provincia",
+      "socialProfiles": "Perfiles Sociales",
+      "platform": "Plataforma",
+      "platformPlaceholder": "LinkedIn",
+      "url": "URL",
+      "urlPlaceholder": "https://...",
+      "addProfile": "Añadir perfil"
+    },
+    "summary": {
+      "label": "Resumen Profesional",
+      "placeholder": "Escribe un resumen profesional..."
+    },
+    "experience": {
+      "label": "Experiencia",
+      "position": "Puesto",
+      "removeTooltip": "Eliminar experiencia",
+      "role": "Cargo",
+      "rolePlaceholder": "Ingeniero de Software",
+      "company": "Empresa",
+      "companyPlaceholder": "Acme Inc.",
+      "dates": "Fechas",
+      "datesPlaceholder": "2020 – Presente",
+      "bulletPoints": "Puntos destacados",
+      "bulletPlaceholder": "Describe un logro...",
+      "removeBulletTooltip": "Eliminar punto",
+      "addBullet": "Añadir punto",
+      "addExperience": "Añadir Experiencia"
+    },
+    "education": {
+      "label": "Formación",
+      "school": "Centro",
+      "removeTooltip": "Eliminar formación",
+      "institution": "Institución",
+      "institutionPlaceholder": "Nombre de la universidad",
+      "degree": "Titulación",
+      "degreePlaceholder": "Grado en Ingeniería Informática",
+      "year": "Año",
+      "yearPlaceholder": "2020",
+      "addEducation": "Añadir Formación"
+    },
+    "skills": {
+      "label": "Habilidades",
+      "placeholder": "Añadir habilidad...",
+      "add": "Añadir"
+    }
+  },
+  "pdf": {
+    "summary": "Resumen Profesional",
+    "experience": "Experiencia",
+    "skills": "Habilidades",
+    "education": "Formación"
+  }
+}

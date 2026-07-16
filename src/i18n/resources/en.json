@@ -1,0 +1,131 @@
+{
+  "common": {
+    "app": {
+      "title": "ATS CV Tailor",
+      "subtitle": "AI-Powered Resume Optimization"
+    },
+    "models": {
+      "local": "Local Model",
+      "gpt4o": "GPT-4o"
+    },
+    "inputPanel": {
+      "heading": "Your CV & Job Description",
+      "uploadLabel": "Upload CV (.docx / .pdf)",
+      "parsingFile": "Parsing file...",
+      "dropHere": "Drop your CV here or ",
+      "browse": "browse",
+      "supportsFormats": "Supports .docx and .pdf",
+      "cvLabel": "Current CV Text",
+      "cvPlaceholder": "Paste your CV here, or upload a file above...",
+      "jdLabel": "Job Description (optional)",
+      "jdPlaceholder": "Paste the job description here, or leave empty to just run the CV text through the optimizer.",
+      "generate": "Generate Tailored CV",
+      "generating": "Generating..."
+    },
+    "preview": {
+      "heading": "Preview",
+      "idleTitle": "ATS-Optimized Resume",
+      "idleDescription": "Enter your CV and a job description on the left, then click Generate to create a tailored resume.",
+      "apiKeyRequired": "API Key Required",
+      "generationFailed": "Generation Failed",
+      "apiKeyHelp": "Set VITE_OPENAI_API_KEY in your .env file, or configure VITE_LLM_BASE_URL for a local model.",
+      "tryAgain": "Try Again",
+      "editor": "Editor",
+      "preview": "Preview",
+      "downloadPDF": "Download PDF",
+      "tailorAnother": "Tailor another CV"
+    },
+    "loading": {
+      "step1": "Analyzing job description...",
+      "step2": "Matching keywords and skills...",
+      "step3": "Optimizing experience bullet points...",
+      "step4": "Structuring tailored resume..."
+    },
+    "errors": {
+      "generic": "An unexpected error occurred",
+      "pdfFailed": "Failed to generate PDF",
+      "cvRequired": "CV text is required",
+      "apiKeyRequired": "API key is required. Set VITE_OPENAI_API_KEY for OpenAI or configure VITE_LLM_BASE_URL for a local model.",
+      "openaiKeyNotConfigured": "OpenAI API key not configured. Set VITE_OPENAI_API_KEY in your .env file.",
+      "emptyResponse": "Empty response from LLM",
+      "parseFailed": "Failed to parse LLM response as JSON. The model may have returned an unexpected format.",
+      "invalidObject": "Invalid response: not a JSON object",
+      "missingField": "Invalid response: missing required field \"{{key}}\"",
+      "contactMustBeObject": "Invalid response: \"contact\" must be an object",
+      "summaryMustBeString": "Invalid response: \"summary\" must be a string",
+      "experienceMustBeArray": "Invalid response: \"experience\" must be an array",
+      "skillsMustBeArray": "Invalid response: \"skills\" must be an array",
+      "educationMustBeArray": "Invalid response: \"education\" must be an array",
+      "unsupportedFile": "Unsupported file type: .{{ext}}. Please upload a .docx or .pdf file.",
+      "fileParseFailed": "Failed to parse file",
+      "noResumeData": "No resume data provided"
+    },
+    "language": {
+      "label": "Language",
+      "en": "English",
+      "es": "Spanish"
+    }
+  },
+  "editor": {
+    "contact": {
+      "label": "Contact",
+      "name": "Name",
+      "namePlaceholder": "Full name",
+      "email": "Email",
+      "emailPlaceholder": "email@example.com",
+      "phone": "Phone",
+      "phonePlaceholder": "+1 (555) 000-0000",
+      "location": "Location",
+      "locationPlaceholder": "City, State",
+      "socialProfiles": "Social Profiles",
+      "platform": "Platform",
+      "platformPlaceholder": "LinkedIn",
+      "url": "URL",
+      "urlPlaceholder": "https://...",
+      "addProfile": "Add profile"
+    },
+    "summary": {
+      "label": "Professional Summary",
+      "placeholder": "Write a professional summary..."
+    },
+    "experience": {
+      "label": "Experience",
+      "position": "Position",
+      "removeTooltip": "Remove experience",
+      "role": "Role",
+      "rolePlaceholder": "Software Engineer",
+      "company": "Company",
+      "companyPlaceholder": "Acme Inc.",
+      "dates": "Dates",
+      "datesPlaceholder": "2020 – Present",
+      "bulletPoints": "Bullet points",
+      "bulletPlaceholder": "Describe an achievement...",
+      "removeBulletTooltip": "Remove bullet",
+      "addBullet": "Add bullet",
+      "addExperience": "Add Experience"
+    },
+    "education": {
+      "label": "Education",
+      "school": "School",
+      "removeTooltip": "Remove education",
+      "institution": "Institution",
+      "institutionPlaceholder": "University name",
+      "degree": "Degree",
+      "degreePlaceholder": "B.S. Computer Science",
+      "year": "Year",
+      "yearPlaceholder": "2020",
+      "addEducation": "Add Education"
+    },
+    "skills": {
+      "label": "Skills",
+      "placeholder": "Add a skill...",
+      "add": "Add"
+    }
+  },
+  "pdf": {
+    "summary": "Professional Summary",
+    "experience": "Experience",
+    "skills": "Skills",
+    "education": "Education"
+  }
+}

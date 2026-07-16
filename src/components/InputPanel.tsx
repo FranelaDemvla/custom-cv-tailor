@@ -2,6 +2,7 @@ import { useState, useRef, useCallback } from "react";
 import type { ChangeEvent, DragEvent, FormEvent } from "react";
 import { Upload, FileText, Loader2, AlertCircle, Sparkles } from "lucide-react";
 import { clsx } from "clsx";
+import { useTranslation, Trans } from "react-i18next";
 import { parseCVFile } from "../services/parserService";
 
 interface InputPanelProps {
@@ -23,6 +24,7 @@ export default function InputPanel({
   canGenerate,
   isGenerating,
 }: InputPanelProps) {
+  const { t } = useTranslation();
   const [isParsing, setIsParsing] = useState(false);
   const [parseError, setParseError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -37,13 +39,13 @@ export default function InputPanel({
         onCvChange(text);
       } catch (err) {
         setParseError(
-          err instanceof Error ? err.message : "Failed to parse file",
+          err instanceof Error ? err.message : t("common:errors.fileParseFailed"),
         );
       } finally {
         setIsParsing(false);
       }
     },
-    [onCvChange],
+    [onCvChange, t],
   );
 
   const handleDrop = useCallback(
@@ -86,12 +88,12 @@ export default function InputPanel({
       className="bg-white rounded-xl border border-surface-200 p-6 space-y-6"
     >
       <h2 className="text-lg font-semibold text-surface-900">
-        Your CV & Job Description
+        {t("common:inputPanel.heading")}
       </h2>
 
       <div className="space-y-2">
         <label className="text-sm font-medium text-surface-700">
-          Upload CV (.docx / .pdf)
+          {t("common:inputPanel.uploadLabel")}
         </label>
         <div
           onDrop={handleDrop}
@@ -108,17 +110,19 @@ export default function InputPanel({
           {isParsing ? (
             <div className="flex flex-col items-center gap-2 text-surface-500">
               <Loader2 className="w-8 h-8 animate-spin" />
-              <span className="text-sm">Parsing file...</span>
+              <span className="text-sm">{t("common:inputPanel.parsingFile")}</span>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2">
               <Upload className="w-8 h-8 text-surface-400" />
               <span className="text-sm text-surface-500">
-                Drop your CV here or{" "}
-                <span className="text-brand-600 font-medium">browse</span>
+                <Trans i18nKey="common:inputPanel.dropHere">
+                  Drop your CV here or{" "}
+                  <span className="text-brand-600 font-medium">browse</span>
+                </Trans>
               </span>
               <span className="text-xs text-surface-400">
-                Supports .docx and .pdf
+                {t("common:inputPanel.supportsFormats")}
               </span>
             </div>
           )}
@@ -141,14 +145,14 @@ export default function InputPanel({
       <div className="space-y-2">
         <label className="text-sm font-medium text-surface-700 flex items-center gap-2">
           <FileText className="w-4 h-4" />
-          Current CV Text
+          {t("common:inputPanel.cvLabel")}
         </label>
         <textarea
           value={cvText}
           onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
             onCvChange(e.target.value)
           }
-          placeholder="Paste your CV here, or upload a file above..."
+          placeholder={t("common:inputPanel.cvPlaceholder")}
           rows={10}
           className="w-full rounded-lg border border-surface-200 bg-surface-50 p-3 text-sm text-surface-800 placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-y"
         />
@@ -157,14 +161,14 @@ export default function InputPanel({
       <div className="space-y-2">
         <label className="text-sm font-medium text-surface-700 flex items-center gap-2">
           <FileText className="w-4 h-4" />
-          Job Description (optional)
+          {t("common:inputPanel.jdLabel")}
         </label>
         <textarea
           value={jdText}
           onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
             onJdChange(e.target.value)
           }
-          placeholder="Paste the job description here, or leave empty to just run the CV text through the optimizer."
+          placeholder={t("common:inputPanel.jdPlaceholder")}
           rows={10}
           className="w-full rounded-lg border border-surface-200 bg-surface-50 p-3 text-sm text-surface-800 placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-y"
         />
@@ -183,12 +187,12 @@ export default function InputPanel({
         {isGenerating ? (
           <>
             <Loader2 className="w-4 h-4 animate-spin" />
-            Generating...
+            {t("common:inputPanel.generating")}
           </>
         ) : (
           <>
             <Sparkles className="w-4 h-4" />
-            Generate Tailored CV
+            {t("common:inputPanel.generate")}
           </>
         )}
       </button>

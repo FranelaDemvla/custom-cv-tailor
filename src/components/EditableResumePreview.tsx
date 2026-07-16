@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Download, ArrowLeft, Eye, Pencil } from "lucide-react";
 import { clsx } from "clsx";
 import type { ResumeData } from "../types";
@@ -22,6 +23,7 @@ export default function EditableResumePreview({
   onDownload,
   onReset,
 }: EditableResumePreviewProps) {
+  const { t } = useTranslation();
   const [mobileView, setMobileView] = useState<"editor" | "preview">("editor");
 
   return (
@@ -38,7 +40,7 @@ export default function EditableResumePreview({
           )}
         >
           <Pencil className="w-3.5 h-3.5" />
-          Editor
+          {t("common:preview.editor")}
         </button>
         <button
           type="button"
@@ -51,7 +53,7 @@ export default function EditableResumePreview({
           )}
         >
           <Eye className="w-3.5 h-3.5" />
-          Preview
+          {t("common:preview.preview")}
         </button>
       </div>
 
@@ -89,7 +91,7 @@ export default function EditableResumePreview({
           className="w-full py-3 rounded-lg bg-brand-600 text-white font-medium text-sm flex items-center justify-center gap-2 hover:bg-brand-700 transition-colors"
         >
           <Download className="w-4 h-4" />
-          Download PDF
+          {t("common:preview.downloadPDF")}
         </button>
 
         <button
@@ -97,7 +99,7 @@ export default function EditableResumePreview({
           className="text-sm text-surface-500 hover:text-surface-700 flex items-center justify-center gap-1 transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          Tailor another CV
+          {t("common:preview.tailorAnother")}
         </button>
       </div>
     </div>

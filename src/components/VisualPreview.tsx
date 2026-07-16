@@ -1,8 +1,10 @@
 import { useRef, useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import type { ResumeData } from "../types";
 import { sanitize } from "../lib/sanitize";
 
 export default function VisualPreview({ data }: { data: ResumeData }) {
+  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.5);
 
@@ -88,7 +90,7 @@ export default function VisualPreview({ data }: { data: ResumeData }) {
 
           {summary && (
             <div style={{ marginBottom: 6 }}>
-              <SectionTitle>Professional Summary</SectionTitle>
+              <SectionTitle>{t("pdf:summary")}</SectionTitle>
               <div style={{ fontSize: 9.5, lineHeight: 1.5 }}>
                 {sanitize(summary)}
               </div>
@@ -97,7 +99,7 @@ export default function VisualPreview({ data }: { data: ResumeData }) {
 
           {experience.length > 0 && (
             <div>
-              <SectionTitle>Experience</SectionTitle>
+              <SectionTitle>{t("pdf:experience")}</SectionTitle>
               {experience.map((exp, i) => (
                 <div key={i} style={{ marginBottom: 6 }}>
                   <div
@@ -141,7 +143,7 @@ export default function VisualPreview({ data }: { data: ResumeData }) {
 
           {skills.length > 0 && (
             <div>
-              <SectionTitle>Skills</SectionTitle>
+              <SectionTitle>{t("pdf:skills")}</SectionTitle>
               <div
                 style={{
                   display: "flex",
@@ -169,7 +171,7 @@ export default function VisualPreview({ data }: { data: ResumeData }) {
 
           {education.length > 0 && (
             <div>
-              <SectionTitle>Education</SectionTitle>
+              <SectionTitle>{t("pdf:education")}</SectionTitle>
               {education.map((edu, i) => (
                 <div
                   key={i}

@@ -1,4 +1,4 @@
-
+import { useTranslation } from 'react-i18next';
 import { Loader2, CheckCircle2, AlertCircle, FileText, ArrowLeft } from 'lucide-react'
 import { clsx } from 'clsx'
 import EditableResumePreview from './EditableResumePreview'
@@ -55,7 +55,8 @@ interface ErrorStateProps {
 }
 
 function ErrorState({ error, onReset }: ErrorStateProps) {
-  const isKeyError = error?.toLowerCase().includes('api key')
+  const { t } = useTranslation();
+  const isKeyError = error?.toLowerCase().includes('api key');
 
   return (
     <div className="flex flex-col items-center py-12 px-6 text-center">
@@ -63,11 +64,11 @@ function ErrorState({ error, onReset }: ErrorStateProps) {
         <AlertCircle className="w-8 h-8 text-red-600" />
       </div>
       <h3 className="text-lg font-semibold text-surface-900 mb-2">
-        {isKeyError ? 'API Key Required' : 'Generation Failed'}
+        {isKeyError ? t("common:preview.apiKeyRequired") : t("common:preview.generationFailed")}
       </h3>
       <p className="text-sm text-surface-500 mb-6 max-w-sm">
         {isKeyError
-          ? 'Set VITE_OPENAI_API_KEY in your .env file, or configure VITE_LLM_BASE_URL for a local model.'
+          ? t("common:preview.apiKeyHelp")
           : error}
       </p>
 
@@ -76,21 +77,23 @@ function ErrorState({ error, onReset }: ErrorStateProps) {
         className="py-2.5 px-6 rounded-lg border border-surface-200 text-sm font-medium text-surface-700 hover:bg-surface-50 transition-colors flex items-center gap-2"
       >
         <ArrowLeft className="w-3.5 h-3.5" />
-        Try Again
+        {t("common:preview.tryAgain")}
       </button>
     </div>
   )
 }
 
 function IdleState() {
+  const { t } = useTranslation();
+
   return (
     <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
       <div className="w-16 h-16 rounded-full bg-surface-100 flex items-center justify-center mb-4">
         <FileText className="w-8 h-8 text-surface-300" />
       </div>
-      <h3 className="text-lg font-semibold text-surface-900 mb-1">ATS-Optimized Resume</h3>
+      <h3 className="text-lg font-semibold text-surface-900 mb-1">{t("common:preview.idleTitle")}</h3>
       <p className="text-sm text-surface-500 max-w-xs">
-        Enter your CV and a job description on the left, then click Generate to create a tailored resume.
+        {t("common:preview.idleDescription")}
       </p>
     </div>
   )
@@ -108,9 +111,11 @@ interface PreviewPanelProps {
 }
 
 export default function PreviewPanel({ status, stepIndex, loadingSteps, resumeData, error, onDownload, onReset, onDataChange }: PreviewPanelProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="bg-white rounded-xl border border-surface-200 p-6 flex flex-col">
-      <h2 className="text-lg font-semibold text-surface-900 mb-4 shrink-0">Preview</h2>
+      <h2 className="text-lg font-semibold text-surface-900 mb-4 shrink-0">{t("common:preview.heading")}</h2>
       <div className="flex-1 flex flex-col min-h-0">
         {status === 'idle' && <IdleState />}
         {status === 'generating' && <LoadingState stepIndex={stepIndex} loadingSteps={loadingSteps} />}

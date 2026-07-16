@@ -1,17 +1,11 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import Header from "./components/Header";
 import InputPanel from "./components/InputPanel";
 import PreviewPanel from "./components/PreviewPanel";
 import { tailorCV } from "./services/openaiService";
 import { generatePDF } from "./services/pdfService";
 import type { ResumeData, Status, Model } from "./types";
-
-const LOADING_STEPS = [
-  "Analyzing job description...",
-  "Matching keywords and skills...",
-  "Optimizing experience bullet points...",
-  "Structuring tailored resume...",
-];
 
 function getDefaultModel(): Model {
   if (import.meta.env.VITE_LLM_BASE_URL) return "local";
@@ -20,6 +14,15 @@ function getDefaultModel(): Model {
 }
 
 export default function App() {
+  const { t } = useTranslation();
+
+  const LOADING_STEPS = useMemo(() => [
+    t("common:loading.step1"),
+    t("common:loading.step2"),
+    t("common:loading.step3"),
+    t("common:loading.step4"),
+  ], [t]);
+
   const [cvText, setCvText] = useState("");
   const [jdText, setJdText] = useState("");
   const [status, setStatus] = useState<Status>("idle");
@@ -50,21 +53,21 @@ export default function App() {
     } catch (err) {
       clearInterval(stepTimer);
       setError(
-        err instanceof Error ? err.message : "An unexpected error occurred",
+        err instanceof Error ? err.message : t("common:errors.generic"),
       );
       setStatus("error");
     }
-  }, [cvText, jdText, model]);
+  }, [cvText, jdText, model, t, LOADING_STEPS]);
 
   const handleDownload = useCallback(async () => {
     if (!resumeData) return;
     try {
       await generatePDF(resumeData);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to generate PDF");
+      setError(err instanceof Error ? err.message : t("common:errors.pdfFailed"));
       setStatus("error");
     }
-  }, [resumeData]);
+  }, [resumeData, t]);
 
   const handleReset = useCallback(() => {
     setStatus("idle");

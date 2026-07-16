@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { X } from "lucide-react";
 import { clsx } from "clsx";
 import { SectionLabel } from "./FormField";
@@ -11,6 +12,7 @@ export default function ResumeSkillsEditor({
   data: ResumeData;
   onChange: (data: ResumeData) => void;
 }) {
+  const { t } = useTranslation();
   const [newSkill, setNewSkill] = useState("");
 
   const addSkill = () => {
@@ -34,7 +36,7 @@ export default function ResumeSkillsEditor({
 
   return (
     <div className="space-y-2">
-      <SectionLabel>Skills</SectionLabel>
+      <SectionLabel>{t("editor:skills.label")}</SectionLabel>
       <div className="flex flex-wrap gap-1.5">
         {(data.skills || []).map((skill, i) => (
           <span
@@ -58,7 +60,7 @@ export default function ResumeSkillsEditor({
           value={newSkill}
           onChange={(e) => setNewSkill(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Add a skill..."
+          placeholder={t("editor:skills.placeholder")}
           className="flex-1 rounded-lg border border-surface-200 bg-surface-50 px-2.5 py-1.5 text-xs text-surface-800 placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
         />
         <button
@@ -72,7 +74,7 @@ export default function ResumeSkillsEditor({
               : "bg-surface-200 text-surface-400 cursor-not-allowed",
           )}
         >
-          Add
+          {t("editor:skills.add")}
         </button>
       </div>
     </div>

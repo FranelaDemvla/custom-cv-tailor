@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { SectionLabel, Field } from "./FormField";
 import type { ResumeData, ProfileLink } from "../types";
 import { Plus, X } from "lucide-react";
@@ -9,6 +10,8 @@ export default function ResumeContactEditor({
   data: ResumeData;
   onChange: (data: ResumeData) => void;
 }) {
+  const { t } = useTranslation();
+
   const update = (field: keyof ResumeData["contact"], value: string) => {
     onChange({ ...data, contact: { ...data.contact, [field]: value } });
   };
@@ -39,52 +42,52 @@ export default function ResumeContactEditor({
 
   return (
     <div className="space-y-2">
-      <SectionLabel>Contact</SectionLabel>
+      <SectionLabel>{t("editor:contact.label")}</SectionLabel>
       <div className="grid grid-cols-2 gap-2">
         <Field
-          label="Name"
+          label={t("editor:contact.name")}
           value={data.contact?.name || ""}
           onChange={(v) => update("name", v)}
-          placeholder="Full name"
+          placeholder={t("editor:contact.namePlaceholder")}
         />
         <Field
-          label="Email"
+          label={t("editor:contact.email")}
           value={data.contact?.email || ""}
           onChange={(v) => update("email", v)}
-          placeholder="email@example.com"
+          placeholder={t("editor:contact.emailPlaceholder")}
         />
         <Field
-          label="Phone"
+          label={t("editor:contact.phone")}
           value={data.contact?.phone || ""}
           onChange={(v) => update("phone", v)}
-          placeholder="+1 (555) 000-0000"
+          placeholder={t("editor:contact.phonePlaceholder")}
         />
         <Field
-          label="Location"
+          label={t("editor:contact.location")}
           value={data.contact?.location || ""}
           onChange={(v) => update("location", v)}
-          placeholder="City, State"
+          placeholder={t("editor:contact.locationPlaceholder")}
         />
       </div>
 
       <div className="space-y-2">
-        <SectionLabel>Social Profiles</SectionLabel>
+        <SectionLabel>{t("editor:contact.socialProfiles")}</SectionLabel>
         {profiles.map((p, i) => (
           <div key={i} className="grid grid-cols-12 gap-2">
             <div className="col-span-5">
               <Field
-                label={i === 0 ? "Platform" : undefined}
+                label={i === 0 ? t("editor:contact.platform") : undefined}
                 value={p.platform || ""}
                 onChange={(v) => updateProfile(i, "platform", v)}
-                placeholder="LinkedIn"
+                placeholder={t("editor:contact.platformPlaceholder")}
               />
             </div>
             <div className="col-span-6">
               <Field
-                label={i === 0 ? "URL" : undefined}
+                label={i === 0 ? t("editor:contact.url") : undefined}
                 value={p.url || ""}
                 onChange={(v) => updateProfile(i, "url", v)}
-                placeholder="https://..."
+                placeholder={t("editor:contact.urlPlaceholder")}
               />
             </div>
             <div className="col-span-1 flex items-end pb-2">
@@ -104,7 +107,7 @@ export default function ResumeContactEditor({
           className="flex items-center gap-1 text-xs text-brand-600 hover:text-brand-700 transition-colors"
         >
           <Plus className="w-3 h-3" />
-          Add profile
+          {t("editor:contact.addProfile")}
         </button>
       </div>
     </div>

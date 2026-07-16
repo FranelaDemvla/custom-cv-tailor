@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import i18next from "i18next";
 import type { ResumeData, Model } from "../types";
 
 const JSON_SCHEMA = {
@@ -16,23 +17,33 @@ CRITICAL RULES:
 2. Only reorder, rephrase, and emphasize existing content. Remove or de-emphasize irrelevant content.
 3. Output ONLY valid JSON — no markdown, no code fences, no explanatory text.
 
+LANGUAGE: Write all textual content (summary, experience bullet points, skills, and education details) in {{language}}. The JSON structure and keys must remain in English, but all string values must be written in {{language}}.
+
 JSON SCHEMA (return exactly this structure):
 ${JSON.stringify(JSON_SCHEMA, null, 2)}`;
 
+const LANGUAGES: Record<string, string> = {
+  en: "English",
+  es: "Spanish",
+};
+
 function buildSystemPrompt(jobDescription: string): string {
+  const lang = LANGUAGES[i18next.language] || "English";
+  const prompt = SYSTEM_PROMPT_BASE.replace(/\{\{language\}\}/g, lang);
+
   if (jobDescription) {
-    return `${SYSTEM_PROMPT_BASE}
+    return `${prompt}
 
 TAILORING: Rewrite the CV to match the job description below by highlighting relevant skills, experience, and keywords found in the JD. Inject relevant keywords and phrases from the JD naturally into the existing experience and summary.`;
   }
-  return `${SYSTEM_PROMPT_BASE}
+  return `${prompt}
 
 REFORMATTING: Clean up and restructure the CV into a professional format. Improve clarity, grammar, and flow without adding any fabricated information.`;
 }
 
 function validateSchema(data: unknown): asserts data is ResumeData {
   if (!data || typeof data !== "object") {
-    throw new Error("Invalid response: not a JSON object");
+    throw new Error(i18next.t("common:errors.invalidObject"));
   }
 
   const record = data as Record<string, unknown>;
@@ -40,28 +51,28 @@ function validateSchema(data: unknown): asserts data is ResumeData {
   const required = ["contact", "summary", "experience", "skills", "education"];
   for (const key of required) {
     if (!(key in record)) {
-      throw new Error(`Invalid response: missing required field "${key}"`);
+      throw new Error(i18next.t("common:errors.missingField", { key }));
     }
   }
 
   if (!record.contact || typeof record.contact !== "object") {
-    throw new Error('Invalid response: "contact" must be an object');
+    throw new Error(i18next.t("common:errors.contactMustBeObject"));
   }
 
   if (typeof record.summary !== "string") {
-    throw new Error('Invalid response: "summary" must be a string');
+    throw new Error(i18next.t("common:errors.summaryMustBeString"));
   }
 
   if (!Array.isArray(record.experience)) {
-    throw new Error('Invalid response: "experience" must be an array');
+    throw new Error(i18next.t("common:errors.experienceMustBeArray"));
   }
 
   if (!Array.isArray(record.skills)) {
-    throw new Error('Invalid response: "skills" must be an array');
+    throw new Error(i18next.t("common:errors.skillsMustBeArray"));
   }
 
   if (!Array.isArray(record.education)) {
-    throw new Error('Invalid response: "education" must be an array');
+    throw new Error(i18next.t("common:errors.educationMustBeArray"));
   }
 }
 
@@ -104,9 +115,7 @@ interface LLMConfig {
 function getLLMConfig(modelPreference: Model): LLMConfig {
   if (modelPreference === "openai") {
     if (!OPENAI_CONFIG.apiKey) {
-      throw new Error(
-        "OpenAI API key not configured. Set VITE_OPENAI_API_KEY in your .env file.",
-      );
+      throw new Error(i18next.t("common:errors.openaiKeyNotConfigured"));
     }
     return { ...OPENAI_CONFIG, apiKey: OPENAI_CONFIG.apiKey, isLocal: false };
   }
@@ -127,15 +136,13 @@ export async function tailorCV(
   modelPreference: Model = "local",
 ): Promise<ResumeData> {
   if (!cvText || !cvText.trim()) {
-    throw new Error("CV text is required");
+    throw new Error(i18next.t("common:errors.cvRequired"));
   }
 
   const { baseURL, apiKey, model, isLocal } = getLLMConfig(modelPreference);
 
   if (!apiKey) {
-    throw new Error(
-      "API key is required. Set VITE_OPENAI_API_KEY for OpenAI or configure VITE_LLM_BASE_URL for a local model.",
-    );
+    throw new Error(i18next.t("common:errors.apiKeyRequired"));
   }
 
   const openai = new OpenAI({
@@ -171,16 +178,14 @@ export async function tailorCV(
 
   const content = response.choices[0]?.message?.content;
   if (!content) {
-    throw new Error("Empty response from LLM");
+    throw new Error(i18next.t("common:errors.emptyResponse"));
   }
 
   let parsed: unknown;
   try {
     parsed = JSON.parse(cleanJSONResponse(content));
   } catch {
-    throw new Error(
-      "Failed to parse LLM response as JSON. The model may have returned an unexpected format.",
-    );
+    throw new Error(i18next.t("common:errors.parseFailed"));
   }
 
   validateSchema(parsed);

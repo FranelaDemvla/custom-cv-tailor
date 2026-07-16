@@ -1,3 +1,4 @@
+import i18next from "i18next";
 import mammoth from 'mammoth'
 
 function cleanText(text: string): string {
@@ -55,5 +56,5 @@ export async function parseCVFile(file: File): Promise<string> {
   const ext = file.name.split('.').pop()?.toLowerCase()
   if (ext === 'docx') return parseDocx(file)
   if (ext === 'pdf') return parsePdf(file)
-  throw new Error(`Unsupported file type: .${ext}. Please upload a .docx or .pdf file.`)
+  throw new Error(i18next.t("common:errors.unsupportedFile", { ext }))
 }

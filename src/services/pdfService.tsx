@@ -1,10 +1,11 @@
+import i18next from "i18next";
 import { pdf } from '@react-pdf/renderer'
 import ResumeTemplate from '../templates/ResumeTemplate'
 import type { ResumeData } from '../types'
 
 export async function generatePDF(data: ResumeData): Promise<void> {
   if (!data) {
-    throw new Error('No resume data provided')
+    throw new Error(i18next.t("common:errors.noResumeData"))
   }
 
   const blob = await pdf(<ResumeTemplate data={data} />).toBlob()

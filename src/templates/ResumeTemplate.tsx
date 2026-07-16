@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 import type { ExperienceItem, ResumeData } from "../types";
 import { sanitize } from "../lib/sanitize";
@@ -127,6 +128,8 @@ interface ResumeTemplateProps {
 }
 
 export default function ResumeTemplate({ data }: ResumeTemplateProps) {
+  const { t } = useTranslation();
+
   if (!data) return null;
 
   const contact = data.contact || {};
@@ -160,14 +163,14 @@ export default function ResumeTemplate({ data }: ResumeTemplateProps) {
 
         {summary && (
           <View>
-            <Text style={styles.sectionTitle}>Professional Summary</Text>
+            <Text style={styles.sectionTitle}>{t("pdf:summary")}</Text>
             <Text style={styles.summaryText}>{sanitize(summary)}</Text>
           </View>
         )}
 
         {experience.length > 0 && (
           <View>
-            <Text style={styles.sectionTitle}>Experience</Text>
+            <Text style={styles.sectionTitle}>{t("pdf:experience")}</Text>
             {experience.map((exp, i) => (
               <ExperienceItem key={i} exp={exp} />
             ))}
@@ -176,7 +179,7 @@ export default function ResumeTemplate({ data }: ResumeTemplateProps) {
 
         {skills.length > 0 && (
           <View>
-            <Text style={styles.sectionTitle}>Skills</Text>
+            <Text style={styles.sectionTitle}>{t("pdf:skills")}</Text>
             <View style={styles.skillsContainer}>
               {skills.map((skill, i) => (
                 <Text key={i} style={styles.skillItem}>
@@ -189,7 +192,7 @@ export default function ResumeTemplate({ data }: ResumeTemplateProps) {
 
         {education.length > 0 && (
           <View>
-            <Text style={styles.sectionTitle}>Education</Text>
+            <Text style={styles.sectionTitle}>{t("pdf:education")}</Text>
             {education.map((edu, i) => (
               <View key={i} style={styles.eduItem}>
                 <View>
