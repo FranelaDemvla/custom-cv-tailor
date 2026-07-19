@@ -8,6 +8,13 @@
       "local": "Local Model",
       "gpt4o": "GPT-4o"
     },
+    "mode": {
+      "label": "Mode",
+      "tailor": "Tailor to JD",
+      "format": "Format only",
+      "tailorDescription": "Tailor the CV to match the job description",
+      "formatDescription": "Clean up and structure the CV without changing content"
+    },
     "inputPanel": {
       "heading": "Your CV & Job Description",
       "uploadLabel": "Upload CV (.docx / .pdf)",
@@ -20,6 +27,7 @@
       "jdLabel": "Job Description (optional)",
       "jdPlaceholder": "Paste the job description here, or leave empty to just run the CV text through the optimizer.",
       "generate": "Generate Tailored CV",
+      "formatCV": "Format CV",
       "generating": "Generating..."
     },
     "preview": {
@@ -36,10 +44,18 @@
       "tailorAnother": "Tailor another CV"
     },
     "loading": {
-      "step1": "Analyzing job description...",
-      "step2": "Matching keywords and skills...",
-      "step3": "Optimizing experience bullet points...",
-      "step4": "Structuring tailored resume..."
+      "tailor": {
+        "step1": "Analyzing job description...",
+        "step2": "Matching keywords and skills...",
+        "step3": "Optimizing experience bullet points...",
+        "step4": "Structuring tailored resume..."
+      },
+      "format": {
+        "step1": "Extracting contact & sections...",
+        "step2": "Improving grammar and clarity...",
+        "step3": "Restructuring bullet points...",
+        "step4": "Formatting resume..."
+      }
     },
     "errors": {
       "generic": "An unexpected error occurred",

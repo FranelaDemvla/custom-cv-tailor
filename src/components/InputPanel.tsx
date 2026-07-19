@@ -1,9 +1,10 @@
 import { useState, useRef, useCallback } from "react";
 import type { ChangeEvent, DragEvent, FormEvent } from "react";
-import { Upload, FileText, Loader2, AlertCircle, Sparkles } from "lucide-react";
+import { Upload, FileText, Loader2, AlertCircle, Sparkles, Settings } from "lucide-react";
 import { clsx } from "clsx";
 import { useTranslation, Trans } from "react-i18next";
 import { parseCVFile } from "../services/parserService";
+import type { Mode } from "../types";
 
 interface InputPanelProps {
   cvText: string;
@@ -13,6 +14,8 @@ interface InputPanelProps {
   onGenerate: () => void;
   canGenerate: boolean;
   isGenerating: boolean;
+  mode: Mode;
+  onModeChange: (mode: Mode) => void;
 }
 
 export default function InputPanel({
@@ -23,6 +26,8 @@ export default function InputPanel({
   onGenerate,
   canGenerate,
   isGenerating,
+  mode,
+  onModeChange,
 }: InputPanelProps) {
   const { t } = useTranslation();
   const [isParsing, setIsParsing] = useState(false);
@@ -91,6 +96,39 @@ export default function InputPanel({
         {t("common:inputPanel.heading")}
       </h2>
 
+      <div className="space-y-1">
+        <label className="text-sm font-medium text-surface-700 flex items-center gap-1.5">
+          <Settings className="w-4 h-4" />
+          {t("common:mode.label")}
+        </label>
+        <div className="flex rounded-lg border border-surface-200 p-0.5 bg-surface-100">
+          <button
+            type="button"
+            onClick={() => onModeChange("tailor")}
+            className={clsx(
+              "flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors",
+              mode === "tailor"
+                ? "bg-white text-surface-900 shadow-sm"
+                : "text-surface-500 hover:text-surface-700",
+            )}
+          >
+            {t("common:mode.tailor")}
+          </button>
+          <button
+            type="button"
+            onClick={() => onModeChange("format")}
+            className={clsx(
+              "flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors",
+              mode === "format"
+                ? "bg-white text-surface-900 shadow-sm"
+                : "text-surface-500 hover:text-surface-700",
+            )}
+          >
+            {t("common:mode.format")}
+          </button>
+        </div>
+      </div>
+
       <div className="space-y-2">
         <label className="text-sm font-medium text-surface-700">
           {t("common:inputPanel.uploadLabel")}
@@ -158,21 +196,23 @@ export default function InputPanel({
         />
       </div>
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-surface-700 flex items-center gap-2">
-          <FileText className="w-4 h-4" />
-          {t("common:inputPanel.jdLabel")}
-        </label>
-        <textarea
-          value={jdText}
-          onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
-            onJdChange(e.target.value)
-          }
-          placeholder={t("common:inputPanel.jdPlaceholder")}
-          rows={10}
-          className="w-full rounded-lg border border-surface-200 bg-surface-50 p-3 text-sm text-surface-800 placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-y"
-        />
-      </div>
+      {mode === "tailor" && (
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-surface-700 flex items-center gap-2">
+            <FileText className="w-4 h-4" />
+            {t("common:inputPanel.jdLabel")}
+          </label>
+          <textarea
+            value={jdText}
+            onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+              onJdChange(e.target.value)
+            }
+            placeholder={t("common:inputPanel.jdPlaceholder")}
+            rows={10}
+            className="w-full rounded-lg border border-surface-200 bg-surface-50 p-3 text-sm text-surface-800 placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-y"
+          />
+        </div>
+      )}
 
       <button
         type="submit"
@@ -184,17 +224,19 @@ export default function InputPanel({
             : "bg-surface-200 text-surface-400 cursor-not-allowed",
         )}
       >
-        {isGenerating ? (
-          <>
-            <Loader2 className="w-4 h-4 animate-spin" />
-            {t("common:inputPanel.generating")}
-          </>
-        ) : (
-          <>
-            <Sparkles className="w-4 h-4" />
-            {t("common:inputPanel.generate")}
-          </>
-        )}
+{isGenerating ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              {t("common:inputPanel.generating")}
+            </>
+          ) : (
+            <>
+              <Sparkles className="w-4 h-4" />
+              {mode === "format"
+                ? t("common:inputPanel.formatCV")
+                : t("common:inputPanel.generate")}
+            </>
+          )}
       </button>
     </form>
   );

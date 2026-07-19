@@ -5,7 +5,7 @@ import InputPanel from "./components/InputPanel";
 import PreviewPanel from "./components/PreviewPanel";
 import { tailorCV } from "./services/openaiService";
 import { generatePDF } from "./services/pdfService";
-import type { ResumeData, Status, Model } from "./types";
+import type { ResumeData, Status, Model, Mode } from "./types";
 
 function getDefaultModel(): Model {
   if (import.meta.env.VITE_LLM_BASE_URL) return "local";
@@ -16,12 +16,17 @@ function getDefaultModel(): Model {
 export default function App() {
   const { t } = useTranslation();
 
-  const LOADING_STEPS = useMemo(() => [
-    t("common:loading.step1"),
-    t("common:loading.step2"),
-    t("common:loading.step3"),
-    t("common:loading.step4"),
-  ], [t]);
+  const [mode, setMode] = useState<Mode>("tailor");
+
+  const LOADING_STEPS = useMemo(() => {
+    const key = mode === "format" ? "common:loading.format" : "common:loading.tailor";
+    return [
+      t(`${key}.step1`),
+      t(`${key}.step2`),
+      t(`${key}.step3`),
+      t(`${key}.step4`),
+    ];
+  }, [t, mode]);
 
   const [cvText, setCvText] = useState("");
   const [jdText, setJdText] = useState("");
@@ -45,7 +50,7 @@ export default function App() {
     }, 1500);
 
     try {
-      const data = await tailorCV(cvText, jdText, model);
+      const data = await tailorCV(cvText, jdText, model, mode);
       clearInterval(stepTimer);
       setStepIndex(LOADING_STEPS.length);
       setResumeData(data);
@@ -57,7 +62,7 @@ export default function App() {
       );
       setStatus("error");
     }
-  }, [cvText, jdText, model, t, LOADING_STEPS]);
+  }, [cvText, jdText, model, mode, t, LOADING_STEPS]);
 
   const handleDownload = useCallback(async () => {
     if (!resumeData) return;
@@ -91,6 +96,8 @@ export default function App() {
             onGenerate={handleGenerate}
             canGenerate={canGenerate}
             isGenerating={status === "generating"}
+            mode={mode}
+            onModeChange={setMode}
           />
         </div>
         <div className="flex-1 min-w-0">

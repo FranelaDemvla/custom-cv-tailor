@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import i18next from "i18next";
-import type { ResumeData, Model } from "../types";
+import type { ResumeData, Model, Mode } from "../types";
 
 const JSON_SCHEMA = {
   contact: { name: "", email: "", phone: "", location: "", profiles: [{ platform: "", url: "" }] },
@@ -27,9 +27,15 @@ const LANGUAGES: Record<string, string> = {
   es: "Spanish",
 };
 
-function buildSystemPrompt(jobDescription: string): string {
+function buildSystemPrompt(jobDescription: string, mode: Mode): string {
   const lang = LANGUAGES[i18next.language] || "English";
   const prompt = SYSTEM_PROMPT_BASE.replace(/\{\{language\}\}/g, lang);
+
+  if (mode === "format") {
+    return `${prompt}
+
+REFORMATTING: Clean up and restructure the CV into a professional format. Improve clarity, grammar, and flow WITHOUT adding any fabricated information, skills, or experience. Do NOT change the meaning or content of any bullet points. Only rephrase for clarity while preserving all original facts and achievements. Do not invent or add anything that is not explicitly stated in the original CV.`;
+  }
 
   if (jobDescription) {
     return `${prompt}
@@ -134,6 +140,7 @@ export async function tailorCV(
   cvText: string,
   jobDescription: string,
   modelPreference: Model = "local",
+  mode: Mode = "tailor",
 ): Promise<ResumeData> {
   if (!cvText || !cvText.trim()) {
     throw new Error(i18next.t("common:errors.cvRequired"));
@@ -151,14 +158,14 @@ export async function tailorCV(
     dangerouslyAllowBrowser: true,
   });
 
-  const hasJD = jobDescription && jobDescription.trim();
+  const hasJD = mode === "tailor" && jobDescription && jobDescription.trim();
 
   const params: ChatCompletionParams = {
     model,
     messages: [
       {
         role: "system",
-        content: buildSystemPrompt(hasJD ? jobDescription.trim() : ""),
+        content: buildSystemPrompt(hasJD ? jobDescription.trim() : "", mode),
       },
       {
         role: "user",

@@ -8,6 +8,13 @@
       "local": "Modelo Local",
       "gpt4o": "GPT-4o"
     },
+    "mode": {
+      "label": "Modo",
+      "tailor": "Adaptar a oferta",
+      "format": "Solo formatear",
+      "tailorDescription": "Adaptar el CV para que coincida con la oferta de trabajo",
+      "formatDescription": "Limpiar y estructurar el CV sin cambiar el contenido"
+    },
     "inputPanel": {
       "heading": "Tu CV y Oferta de Trabajo",
       "uploadLabel": "Subir CV (.docx / .pdf)",
@@ -20,6 +27,7 @@
       "jdLabel": "Oferta de trabajo (opcional)",
       "jdPlaceholder": "Pega la descripción del puesto aquí, o déjalo vacío para solo optimizar el CV.",
       "generate": "Generar CV Personalizado",
+      "formatCV": "Formatear CV",
       "generating": "Generando..."
     },
     "preview": {
@@ -36,10 +44,18 @@
       "tailorAnother": "Personalizar otro CV"
     },
     "loading": {
-      "step1": "Analizando oferta de trabajo...",
-      "step2": "Emparejando palabras clave y habilidades...",
-      "step3": "Optimizando puntos de experiencia...",
-      "step4": "Estructurando CV personalizado..."
+      "tailor": {
+        "step1": "Analizando oferta de trabajo...",
+        "step2": "Emparejando palabras clave y habilidades...",
+        "step3": "Optimizando puntos de experiencia...",
+        "step4": "Estructurando CV personalizado..."
+      },
+      "format": {
+        "step1": "Extrayendo contacto y secciones...",
+        "step2": "Mejorando gramática y claridad...",
+        "step3": "Reestructurando puntos clave...",
+        "step4": "Formateando CV..."
+      }
     },
     "errors": {
       "generic": "Ocurrió un error inesperado",

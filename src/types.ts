@@ -34,3 +34,4 @@ export interface ResumeData {
 
 export type Status = 'idle' | 'generating' | 'success' | 'error';
 export type Model = 'local' | 'openai';
+export type Mode = 'tailor' | 'format';
