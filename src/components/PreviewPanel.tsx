@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Loader2, CheckCircle2, AlertCircle, FileText, ArrowLeft } from 'lucide-react'
 import { clsx } from 'clsx'
-import EditableResumePreview from './EditableResumePreview'
+import VisualPreview from './VisualPreview'
 import type { ResumeData, Status } from '../types'
 
 interface LoadingStateProps {
@@ -105,12 +105,10 @@ interface PreviewPanelProps {
   loadingSteps: string[];
   resumeData: ResumeData | null;
   error: string | null;
-  onDownload: () => void;
   onReset: () => void;
-  onDataChange: (data: ResumeData) => void;
 }
 
-export default function PreviewPanel({ status, stepIndex, loadingSteps, resumeData, error, onDownload, onReset, onDataChange }: PreviewPanelProps) {
+export default function PreviewPanel({ status, stepIndex, loadingSteps, resumeData, error, onReset }: PreviewPanelProps) {
   const { t } = useTranslation();
 
   return (
@@ -120,12 +118,11 @@ export default function PreviewPanel({ status, stepIndex, loadingSteps, resumeDa
         {status === 'idle' && <IdleState />}
         {status === 'generating' && <LoadingState stepIndex={stepIndex} loadingSteps={loadingSteps} />}
         {status === 'success' && resumeData && (
-          <EditableResumePreview
-            resumeData={resumeData}
-            onDataChange={onDataChange}
-            onDownload={onDownload}
-            onReset={onReset}
-          />
+          <div className="flex-1 flex items-start justify-center min-h-0 overflow-auto">
+            <div className="w-full max-w-sm border border-gray-200 rounded-lg">
+              <VisualPreview data={resumeData} />
+            </div>
+          </div>
         )}
         {status === 'error' && error && <ErrorState error={error} onReset={onReset} />}
       </div>

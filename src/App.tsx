@@ -1,8 +1,14 @@
 import { useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { Download, ArrowLeft } from "lucide-react";
 import Header from "./components/Header";
 import InputPanel from "./components/InputPanel";
 import PreviewPanel from "./components/PreviewPanel";
+import ResumeContactEditor from "./components/ResumeContactEditor";
+import ResumeSummaryEditor from "./components/ResumeSummaryEditor";
+import ResumeExperienceEditor from "./components/ResumeExperienceEditor";
+import ResumeSkillsEditor from "./components/ResumeSkillsEditor";
+import ResumeEducationEditor from "./components/ResumeEducationEditor";
 import { tailorCV } from "./services/openaiService";
 import { generatePDF } from "./services/pdfService";
 import type { ResumeData, Status, Model, Mode } from "./types";
@@ -107,12 +113,42 @@ export default function App() {
             loadingSteps={LOADING_STEPS}
             resumeData={resumeData}
             error={error}
-            onDownload={handleDownload}
             onReset={handleReset}
-            onDataChange={setResumeData}
           />
         </div>
       </main>
+      {status === "success" && resumeData && (
+        <section className="max-w-7xl mx-auto w-full px-6 pb-6">
+          <div className="bg-white rounded-xl border border-surface-200 p-6">
+            <h2 className="text-lg font-semibold text-surface-900 mb-4">
+              {t("common:preview.editor")}
+            </h2>
+            <div className="space-y-5">
+              <ResumeContactEditor data={resumeData} onChange={setResumeData} />
+              <ResumeSummaryEditor data={resumeData} onChange={setResumeData} />
+              <ResumeExperienceEditor data={resumeData} onChange={setResumeData} />
+              <ResumeSkillsEditor data={resumeData} onChange={setResumeData} />
+              <ResumeEducationEditor data={resumeData} onChange={setResumeData} />
+            </div>
+            <div className="flex flex-col gap-2 pt-4 border-t border-surface-100 mt-4">
+              <button
+                onClick={handleDownload}
+                className="w-full py-3 rounded-lg bg-brand-600 text-white font-medium text-sm flex items-center justify-center gap-2 hover:bg-brand-700 transition-colors"
+              >
+                <Download className="w-4 h-4" />
+                {t("common:preview.downloadPDF")}
+              </button>
+              <button
+                onClick={handleReset}
+                className="text-sm text-surface-500 hover:text-surface-700 flex items-center justify-center gap-1 transition-colors"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                {t("common:preview.tailorAnother")}
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   );
 }
