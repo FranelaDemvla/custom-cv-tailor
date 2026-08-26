@@ -1,9 +1,15 @@
 import { useRef, useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import type { ResumeData } from "../types";
+import type { ResumeData, ResumeLayoutOptions } from "../types";
 import { sanitize } from "../lib/sanitize";
 
-export default function VisualPreview({ data }: { data: ResumeData }) {
+export default function VisualPreview({
+  data,
+  layout,
+}: {
+  data: ResumeData;
+  layout: ResumeLayoutOptions;
+}) {
   const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.5);
@@ -37,10 +43,10 @@ export default function VisualPreview({ data }: { data: ResumeData }) {
         className="absolute top-0 left-0 bg-white origin-top-left"
         style={{ width: 595, height: 842, transform: `scale(${scale})` }}
       >
-        <div style={{ padding: 40 }}>
+        <div style={{ padding: layout.padding }}>
           <div
             style={{
-              fontSize: 20,
+              fontSize: 20 * layout.fontScale,
               fontWeight: "bold",
               textAlign: "center",
               marginBottom: 4,
@@ -58,7 +64,7 @@ export default function VisualPreview({ data }: { data: ResumeData }) {
                 gap: 12,
                 marginTop: 12,
                 marginBottom: profiles.length > 0 ? 4 : 12,
-                fontSize: 9,
+                fontSize: 9 * layout.fontScale,
                 color: "#444",
               }}
             >
@@ -74,7 +80,7 @@ export default function VisualPreview({ data }: { data: ResumeData }) {
                 justifyContent: "center",
                 gap: 12,
                 marginBottom: 12,
-                fontSize: 9,
+                fontSize: 9 * layout.fontScale,
                 color: "#444",
               }}
             >
@@ -90,8 +96,8 @@ export default function VisualPreview({ data }: { data: ResumeData }) {
 
           {summary && (
             <div style={{ marginBottom: 6 }}>
-              <SectionTitle>{t("pdf:summary")}</SectionTitle>
-              <div style={{ fontSize: 9.5, lineHeight: 1.5 }}>
+              <SectionTitle fontScale={layout.fontScale}>{t("pdf:summary")}</SectionTitle>
+              <div style={{ fontSize: 9.5 * layout.fontScale, lineHeight: 1.5 }}>
                 {sanitize(summary)}
               </div>
             </div>
@@ -99,7 +105,7 @@ export default function VisualPreview({ data }: { data: ResumeData }) {
 
           {experience.length > 0 && (
             <div>
-              <SectionTitle>{t("pdf:experience")}</SectionTitle>
+              <SectionTitle fontScale={layout.fontScale}>{t("pdf:experience")}</SectionTitle>
               {experience.map((exp, i) => (
                 <div key={i} style={{ marginBottom: 6 }}>
                   <div
@@ -112,14 +118,14 @@ export default function VisualPreview({ data }: { data: ResumeData }) {
                     }}
                   >
                     <div>
-                      <div style={{ fontWeight: "bold", fontSize: 10 }}>
+                      <div style={{ fontWeight: "bold", fontSize: 10 * layout.fontScale }}>
                         {sanitize(exp.role)}
                       </div>
-                      <div style={{ fontSize: 10 }}>
+                      <div style={{ fontSize: 10 * layout.fontScale }}>
                         {sanitize(exp.company)}
                       </div>
                     </div>
-                    <div style={{ fontSize: 9, color: "#555" }}>
+                    <div style={{ fontSize: 9 * layout.fontScale, color: "#555" }}>
                       {sanitize(exp.dates)}
                     </div>
                   </div>
@@ -127,7 +133,7 @@ export default function VisualPreview({ data }: { data: ResumeData }) {
                     <div
                       key={j}
                       style={{
-                        fontSize: 9,
+                        fontSize: 9 * layout.fontScale,
                         marginLeft: 12,
                         marginBottom: 1,
                         lineHeight: 1.4,
@@ -143,7 +149,7 @@ export default function VisualPreview({ data }: { data: ResumeData }) {
 
           {skills.length > 0 && (
             <div>
-              <SectionTitle>{t("pdf:skills")}</SectionTitle>
+              <SectionTitle fontScale={layout.fontScale}>{t("pdf:skills")}</SectionTitle>
               <div
                 style={{
                   display: "flex",
@@ -156,7 +162,7 @@ export default function VisualPreview({ data }: { data: ResumeData }) {
                   <span
                     key={i}
                     style={{
-                      fontSize: 9,
+                      fontSize: 9 * layout.fontScale,
                       backgroundColor: "#f0f0f0",
                       padding: "2px 6px",
                       borderRadius: 3,
@@ -171,7 +177,7 @@ export default function VisualPreview({ data }: { data: ResumeData }) {
 
           {education.length > 0 && (
             <div>
-              <SectionTitle>{t("pdf:education")}</SectionTitle>
+              <SectionTitle fontScale={layout.fontScale}>{t("pdf:education")}</SectionTitle>
               {education.map((edu, i) => (
                 <div
                   key={i}
@@ -180,7 +186,7 @@ export default function VisualPreview({ data }: { data: ResumeData }) {
                     flexDirection: "row",
                     justifyContent: "space-between",
                     marginBottom: 3,
-                    fontSize: 9.5,
+                    fontSize: 9.5 * layout.fontScale,
                   }}
                 >
                   <div>
@@ -200,11 +206,17 @@ export default function VisualPreview({ data }: { data: ResumeData }) {
   );
 }
 
-function SectionTitle({ children }: { children: React.ReactNode }) {
+function SectionTitle({
+  children,
+  fontScale,
+}: {
+  children: React.ReactNode;
+  fontScale: number;
+}) {
   return (
     <div
       style={{
-        fontSize: 11,
+        fontSize: 11 * fontScale,
         fontWeight: "bold",
         textTransform: "uppercase",
         letterSpacing: 1,

@@ -1,18 +1,19 @@
 import { useTranslation } from "react-i18next";
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
-import type { ExperienceItem, ResumeData } from "../types";
+import type { ExperienceItem, ResumeData, ResumeLayoutOptions } from "../types";
 import { sanitize } from "../lib/sanitize";
 
-const styles = StyleSheet.create({
+function createStyles({ padding, fontScale }: ResumeLayoutOptions) {
+  return StyleSheet.create({
   page: {
-    padding: 40,
+    padding,
     fontFamily: "Helvetica",
-    fontSize: 10,
+    fontSize: 10 * fontScale,
     lineHeight: 1.4,
     color: "#1a1a1a",
   },
   name: {
-    fontSize: 20,
+    fontSize: 20 * fontScale,
     fontFamily: "Helvetica-Bold",
     textAlign: "center",
     marginBottom: 4,
@@ -22,7 +23,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 12,
     marginVertical: 4,
-    fontSize: 9,
+    fontSize: 9 * fontScale,
     color: "#444",
   },
   divider: {
@@ -32,7 +33,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   sectionTitle: {
-    fontSize: 11,
+    fontSize: 11 * fontScale,
     fontFamily: "Helvetica-Bold",
     textTransform: "uppercase",
     letterSpacing: 1,
@@ -44,7 +45,7 @@ const styles = StyleSheet.create({
     paddingBottom: 2,
   },
   summaryText: {
-    fontSize: 9.5,
+    fontSize: 9.5 * fontScale,
     marginBottom: 4,
     lineHeight: 1.5,
   },
@@ -56,17 +57,17 @@ const styles = StyleSheet.create({
   },
   expRole: {
     fontFamily: "Helvetica-Bold",
-    fontSize: 10,
+    fontSize: 10 * fontScale,
   },
   expCompany: {
-    fontSize: 10,
+    fontSize: 10 * fontScale,
   },
   expDates: {
-    fontSize: 9,
+    fontSize: 9 * fontScale,
     color: "#555",
   },
   bullet: {
-    fontSize: 9,
+    fontSize: 9 * fontScale,
     marginLeft: 12,
     marginBottom: 1,
     lineHeight: 1.4,
@@ -77,7 +78,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   skillItem: {
-    fontSize: 9,
+    fontSize: 9 * fontScale,
     backgroundColor: "#f0f0f0",
     paddingHorizontal: 6,
     paddingVertical: 2,
@@ -87,7 +88,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 3,
-    fontSize: 9.5,
+    fontSize: 9.5 * fontScale,
   },
   eduInstitution: {
     fontFamily: "Helvetica-Bold",
@@ -96,14 +97,21 @@ const styles = StyleSheet.create({
   eduYear: {
     color: "#555",
   },
-});
+  });
+}
 
 const MAX_EXPERIENCE = 4;
 const MAX_BULLETS_PER_ROLE = 4;
 const MAX_EDUCATION = 3;
 const MAX_SUMMARY_LENGTH = 500;
 
-function ExperienceItem({ exp }: { exp: ExperienceItem }) {
+function ExperienceItem({
+  exp,
+  styles,
+}: {
+  exp: ExperienceItem;
+  styles: ReturnType<typeof createStyles>;
+}) {
   const bullets = exp.bullets?.slice(0, MAX_BULLETS_PER_ROLE) || [];
   return (
     <View>
@@ -125,9 +133,10 @@ function ExperienceItem({ exp }: { exp: ExperienceItem }) {
 
 interface ResumeTemplateProps {
   data: ResumeData;
+  layout: ResumeLayoutOptions;
 }
 
-export default function ResumeTemplate({ data }: ResumeTemplateProps) {
+export default function ResumeTemplate({ data, layout }: ResumeTemplateProps) {
   const { t } = useTranslation();
 
   if (!data) return null;
@@ -137,6 +146,7 @@ export default function ResumeTemplate({ data }: ResumeTemplateProps) {
   const skills = data.skills || [];
   const education = (data.education || []).slice(0, MAX_EDUCATION);
   const summary = (data.summary || "").slice(0, MAX_SUMMARY_LENGTH);
+  const styles = createStyles(layout);
 
   const contactParts = [contact.email, contact.phone, contact.location].filter(
     Boolean,
@@ -172,7 +182,7 @@ export default function ResumeTemplate({ data }: ResumeTemplateProps) {
           <View>
             <Text style={styles.sectionTitle}>{t("pdf:experience")}</Text>
             {experience.map((exp, i) => (
-              <ExperienceItem key={i} exp={exp} />
+              <ExperienceItem key={i} exp={exp} styles={styles} />
             ))}
           </View>
         )}

@@ -9,9 +9,16 @@ import ResumeSummaryEditor from "./components/ResumeSummaryEditor";
 import ResumeExperienceEditor from "./components/ResumeExperienceEditor";
 import ResumeSkillsEditor from "./components/ResumeSkillsEditor";
 import ResumeEducationEditor from "./components/ResumeEducationEditor";
+import ResumeLayoutEditor from "./components/ResumeLayoutEditor";
 import { tailorCV } from "./services/openaiService";
 import { generatePDF } from "./services/pdfService";
-import type { ResumeData, Status, Model, Mode } from "./types";
+import {
+  DEFAULT_RESUME_LAYOUT,
+  type ResumeData,
+  type Status,
+  type Model,
+  type Mode,
+} from "./types";
 
 function getDefaultModel(): Model {
   if (import.meta.env.VITE_LLM_BASE_URL) return "local";
@@ -41,6 +48,7 @@ export default function App() {
   const [resumeData, setResumeData] = useState<ResumeData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [model, setModel] = useState<Model>(getDefaultModel);
+  const [layout, setLayout] = useState(DEFAULT_RESUME_LAYOUT);
 
   const handleGenerate = useCallback(async () => {
     setError(null);
@@ -73,12 +81,12 @@ export default function App() {
   const handleDownload = useCallback(async () => {
     if (!resumeData) return;
     try {
-      await generatePDF(resumeData);
+      await generatePDF(resumeData, layout);
     } catch (err) {
       setError(err instanceof Error ? err.message : t("common:errors.pdfFailed"));
       setStatus("error");
     }
-  }, [resumeData, t]);
+  }, [layout, resumeData, t]);
 
   const handleReset = useCallback(() => {
     setStatus("idle");
@@ -112,6 +120,7 @@ export default function App() {
             stepIndex={stepIndex}
             loadingSteps={LOADING_STEPS}
             resumeData={resumeData}
+            layout={layout}
             error={error}
             onReset={handleReset}
           />
@@ -124,6 +133,7 @@ export default function App() {
               {t("common:preview.editor")}
             </h2>
             <div className="space-y-5">
+              <ResumeLayoutEditor layout={layout} onChange={setLayout} />
               <ResumeContactEditor data={resumeData} onChange={setResumeData} />
               <ResumeSummaryEditor data={resumeData} onChange={setResumeData} />
               <ResumeExperienceEditor data={resumeData} onChange={setResumeData} />

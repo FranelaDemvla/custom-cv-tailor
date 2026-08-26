@@ -32,6 +32,16 @@ export interface ResumeData {
   education: EducationItem[];
 }
 
+export interface ResumeLayoutOptions {
+  padding: number;
+  fontScale: number;
+}
+
+export const DEFAULT_RESUME_LAYOUT: ResumeLayoutOptions = {
+  padding: 20,
+  fontScale: 1,
+};
+
 export type Status = 'idle' | 'generating' | 'success' | 'error';
 export type Model = 'local' | 'openai';
 export type Mode = 'tailor' | 'format';

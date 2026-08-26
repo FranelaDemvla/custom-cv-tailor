@@ -83,6 +83,11 @@
     }
   },
   "editor": {
+    "layout": {
+      "label": "Page layout",
+      "padding": "Page padding",
+      "textSize": "Text size"
+    },
     "contact": {
       "label": "Contact",
       "name": "Name",

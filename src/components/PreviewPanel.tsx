@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Loader2, CheckCircle2, AlertCircle, FileText, ArrowLeft } from 'lucide-react'
 import { clsx } from 'clsx'
 import VisualPreview from './VisualPreview'
-import type { ResumeData, Status } from '../types'
+import type { ResumeData, ResumeLayoutOptions, Status } from '../types'
 
 interface LoadingStateProps {
   stepIndex: number;
@@ -104,11 +104,12 @@ interface PreviewPanelProps {
   stepIndex: number;
   loadingSteps: string[];
   resumeData: ResumeData | null;
+  layout: ResumeLayoutOptions;
   error: string | null;
   onReset: () => void;
 }
 
-export default function PreviewPanel({ status, stepIndex, loadingSteps, resumeData, error, onReset }: PreviewPanelProps) {
+export default function PreviewPanel({ status, stepIndex, loadingSteps, resumeData, layout, error, onReset }: PreviewPanelProps) {
   const { t } = useTranslation();
 
   return (
@@ -120,7 +121,7 @@ export default function PreviewPanel({ status, stepIndex, loadingSteps, resumeDa
         {status === 'success' && resumeData && (
           <div className="flex-1 flex items-start justify-center min-h-0 overflow-auto">
             <div className="w-full max-w-sm border border-gray-200 rounded-lg">
-              <VisualPreview data={resumeData} />
+              <VisualPreview data={resumeData} layout={layout} />
             </div>
           </div>
         )}

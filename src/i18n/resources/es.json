@@ -83,6 +83,11 @@
     }
   },
   "editor": {
+    "layout": {
+      "label": "Diseño de página",
+      "padding": "Márgenes de página",
+      "textSize": "Tamaño del texto"
+    },
     "contact": {
       "label": "Contacto",
       "name": "Nombre",
