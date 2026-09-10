@@ -25,21 +25,22 @@ function createStyles(style: ResumeStyleOptions) {
       fontFamily: font.bold,
       fontSize: 22 * scale,
       textAlign: "center",
-      marginBottom: 5,
+      marginBottom: 9,
     },
     contactRow: {
       flexDirection: "row",
       justifyContent: "center",
-      marginVertical: 3,
+      marginVertical: 2,
       fontSize: 9 * scale,
+      lineHeight: 1.25,
       color: "#4B5563",
     },
     divider: {
       borderBottomWidth: 1.5,
       borderBottomColor: accent.color,
       borderBottomStyle: "solid",
-      marginTop: 9,
-      marginBottom: 2,
+      marginTop: 8,
+      marginBottom: 3,
     },
     sectionTitle: {
       color: accent.color,
@@ -66,8 +67,13 @@ function createStyles(style: ResumeStyleOptions) {
     expHeader: {
       flexDirection: "row",
       justifyContent: "space-between",
+      alignItems: "flex-start",
       marginBottom: 2,
       marginTop: 4,
+    },
+    expDetails: {
+      flex: 1,
+      marginRight: 12,
     },
     expRole: {
       fontFamily: font.bold,
@@ -80,25 +86,38 @@ function createStyles(style: ResumeStyleOptions) {
       fontSize: 9 * scale,
       color: "#5B6470",
       textAlign: "right",
+      flexShrink: 0,
     },
-    bullet: {
-      fontSize: 9 * scale,
-      marginLeft: 12,
+    bulletRow: {
+      flexDirection: "row",
+      marginLeft: 6,
       marginBottom: 1.5,
+    },
+    bulletMarker: {
+      fontSize: 9 * scale,
+      lineHeight: 1.4,
+      width: 9,
+    },
+    bulletText: {
+      flex: 1,
+      fontSize: 9 * scale,
       lineHeight: 1.4,
     },
     skillsContainer: {
       flexDirection: "row",
       flexWrap: "wrap",
       gap: 4,
+      alignItems: "center",
     },
     skillItem: {
       color: accent.color,
       backgroundColor: accent.soft,
       fontSize: 8.8 * scale,
       paddingHorizontal: 6,
-      paddingVertical: 3,
-      borderRadius: 2,
+      paddingVertical: 2.5,
+      lineHeight: 1.1,
+      borderRadius: 999,
+      textAlign: "center",
     },
     eduItem: {
       flexDirection: "row",
@@ -107,11 +126,16 @@ function createStyles(style: ResumeStyleOptions) {
       fontSize: 9.5 * scale,
       minPresenceAhead: 24,
     },
+    eduDetails: {
+      flex: 1,
+      marginRight: 12,
+    },
     eduInstitution: {
       fontFamily: font.bold,
     },
     eduYear: {
       color: "#5B6470",
+      flexShrink: 0,
     },
   });
 }
@@ -126,16 +150,17 @@ function ExperienceItem({
   return (
     <View style={styles.expItem}>
       <View style={styles.expHeader}>
-        <View>
+        <View style={styles.expDetails}>
           <Text style={styles.expRole}>{sanitize(exp.role)}</Text>
           <Text style={styles.expCompany}>{sanitize(exp.company)}</Text>
         </View>
         <Text style={styles.expDates}>{sanitize(exp.dates)}</Text>
       </View>
       {(exp.bullets || []).filter(Boolean).map((bullet, index) => (
-        <Text key={index} style={styles.bullet}>
-          {"\u2022"} {sanitize(bullet)}
-        </Text>
+        <View key={index} style={styles.bulletRow}>
+          <Text style={styles.bulletMarker}>{"\u2022"}</Text>
+          <Text style={styles.bulletText}>{sanitize(bullet)}</Text>
+        </View>
       ))}
     </View>
   );
@@ -232,7 +257,7 @@ export default function ResumeTemplate({
             </Text>
             {education.map((item, index) => (
               <View key={index} style={styles.eduItem}>
-                <View>
+                <View style={styles.eduDetails}>
                   <Text style={styles.eduInstitution}>{sanitize(item.institution)}</Text>
                   <Text>{sanitize(item.degree)}</Text>
                 </View>
