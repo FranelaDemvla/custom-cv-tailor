@@ -1,109 +1,120 @@
-import { useTranslation } from "react-i18next";
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
-import type { ExperienceItem, ResumeData, ResumeLayoutOptions } from "../types";
+import type {
+  ExperienceItem,
+  OutputLanguage,
+  ResumeData,
+  ResumeStyleOptions,
+} from "../types";
 import { sanitize } from "../lib/sanitize";
+import { getResumeAccent, getResumeFont, PDF_LABELS } from "../lib/resumeStyles";
 
-function createStyles({ padding, fontScale }: ResumeLayoutOptions) {
+function createStyles(style: ResumeStyleOptions) {
+  const font = getResumeFont(style);
+  const accent = getResumeAccent(style);
+  const scale = style.fontScale;
   return StyleSheet.create({
-  page: {
-    padding,
-    fontFamily: "Helvetica",
-    fontSize: 10 * fontScale,
-    lineHeight: 1.4,
-    color: "#1a1a1a",
-  },
-  name: {
-    fontSize: 20 * fontScale,
-    fontFamily: "Helvetica-Bold",
-    textAlign: "center",
-    marginBottom: 4,
-  },
-  contactRow: {
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 12,
-    marginVertical: 4,
-    fontSize: 9 * fontScale,
-    color: "#444",
-  },
-  divider: {
-    borderBottomWidth: 1,
-    borderBottomColor: "#333",
-    borderBottomStyle: "solid",
-    marginBottom: 10,
-  },
-  sectionTitle: {
-    fontSize: 11 * fontScale,
-    fontFamily: "Helvetica-Bold",
-    textTransform: "uppercase",
-    letterSpacing: 1,
-    borderBottomWidth: 0.5,
-    borderBottomColor: "#999",
-    borderBottomStyle: "solid",
-    marginBottom: 6,
-    marginTop: 10,
-    paddingBottom: 2,
-  },
-  summaryText: {
-    fontSize: 9.5 * fontScale,
-    marginBottom: 4,
-    lineHeight: 1.5,
-  },
-  expHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 2,
-    marginTop: 6,
-  },
-  expRole: {
-    fontFamily: "Helvetica-Bold",
-    fontSize: 10 * fontScale,
-  },
-  expCompany: {
-    fontSize: 10 * fontScale,
-  },
-  expDates: {
-    fontSize: 9 * fontScale,
-    color: "#555",
-  },
-  bullet: {
-    fontSize: 9 * fontScale,
-    marginLeft: 12,
-    marginBottom: 1,
-    lineHeight: 1.4,
-  },
-  skillsContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 4,
-  },
-  skillItem: {
-    fontSize: 9 * fontScale,
-    backgroundColor: "#f0f0f0",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 3,
-  },
-  eduItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 3,
-    fontSize: 9.5 * fontScale,
-  },
-  eduInstitution: {
-    fontFamily: "Helvetica-Bold",
-  },
-  eduDegree: {},
-  eduYear: {
-    color: "#555",
-  },
+    page: {
+      padding: style.padding,
+      fontFamily: font.regular,
+      fontSize: 10 * scale,
+      lineHeight: 1.38,
+      color: "#202124",
+    },
+    name: {
+      color: accent.color,
+      fontFamily: font.bold,
+      fontSize: 22 * scale,
+      textAlign: "center",
+      marginBottom: 5,
+    },
+    contactRow: {
+      flexDirection: "row",
+      justifyContent: "center",
+      marginVertical: 3,
+      fontSize: 9 * scale,
+      color: "#4B5563",
+    },
+    divider: {
+      borderBottomWidth: 1.5,
+      borderBottomColor: accent.color,
+      borderBottomStyle: "solid",
+      marginTop: 9,
+      marginBottom: 2,
+    },
+    sectionTitle: {
+      color: accent.color,
+      fontFamily: font.bold,
+      fontSize: 10.5 * scale,
+      textTransform: "uppercase",
+      letterSpacing: 1,
+      borderBottomWidth: 0.6,
+      borderBottomColor: accent.color,
+      borderBottomStyle: "solid",
+      marginBottom: 6,
+      marginTop: 12,
+      paddingBottom: 3,
+    },
+    summaryText: {
+      fontSize: 9.5 * scale,
+      marginBottom: 2,
+      lineHeight: 1.48,
+    },
+    expItem: {
+      marginBottom: 5,
+      minPresenceAhead: 36,
+    },
+    expHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      marginBottom: 2,
+      marginTop: 4,
+    },
+    expRole: {
+      fontFamily: font.bold,
+      fontSize: 10 * scale,
+    },
+    expCompany: {
+      fontSize: 9.7 * scale,
+    },
+    expDates: {
+      fontSize: 9 * scale,
+      color: "#5B6470",
+      textAlign: "right",
+    },
+    bullet: {
+      fontSize: 9 * scale,
+      marginLeft: 12,
+      marginBottom: 1.5,
+      lineHeight: 1.4,
+    },
+    skillsContainer: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: 4,
+    },
+    skillItem: {
+      color: accent.color,
+      backgroundColor: accent.soft,
+      fontSize: 8.8 * scale,
+      paddingHorizontal: 6,
+      paddingVertical: 3,
+      borderRadius: 2,
+    },
+    eduItem: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      marginBottom: 4,
+      fontSize: 9.5 * scale,
+      minPresenceAhead: 24,
+    },
+    eduInstitution: {
+      fontFamily: font.bold,
+    },
+    eduYear: {
+      color: "#5B6470",
+    },
   });
 }
-
-const MAX_EXPERIENCE = 4;
-const MAX_BULLETS_PER_ROLE = 4;
-const MAX_EDUCATION = 3;
-const MAX_SUMMARY_LENGTH = 500;
 
 function ExperienceItem({
   exp,
@@ -112,19 +123,18 @@ function ExperienceItem({
   exp: ExperienceItem;
   styles: ReturnType<typeof createStyles>;
 }) {
-  const bullets = exp.bullets?.slice(0, MAX_BULLETS_PER_ROLE) || [];
   return (
-    <View>
+    <View style={styles.expItem}>
       <View style={styles.expHeader}>
         <View>
-          <Text style={styles.expRole}>{exp.role}</Text>
-          <Text style={styles.expCompany}>{exp.company}</Text>
+          <Text style={styles.expRole}>{sanitize(exp.role)}</Text>
+          <Text style={styles.expCompany}>{sanitize(exp.company)}</Text>
         </View>
-        <Text style={styles.expDates}>{exp.dates}</Text>
+        <Text style={styles.expDates}>{sanitize(exp.dates)}</Text>
       </View>
-      {bullets.map((b, i) => (
-        <Text key={i} style={styles.bullet}>
-          {"\u2022"} {sanitize(b)}
+      {(exp.bullets || []).filter(Boolean).map((bullet, index) => (
+        <Text key={index} style={styles.bullet}>
+          {"\u2022"} {sanitize(bullet)}
         </Text>
       ))}
     </View>
@@ -133,66 +143,81 @@ function ExperienceItem({
 
 interface ResumeTemplateProps {
   data: ResumeData;
-  layout: ResumeLayoutOptions;
+  layout: ResumeStyleOptions;
+  outputLanguage?: OutputLanguage;
 }
 
-export default function ResumeTemplate({ data, layout }: ResumeTemplateProps) {
-  const { t } = useTranslation();
-
-  if (!data) return null;
-
-  const contact = data.contact || {};
-  const experience = (data.experience || []).slice(0, MAX_EXPERIENCE);
-  const skills = data.skills || [];
-  const education = (data.education || []).slice(0, MAX_EDUCATION);
-  const summary = (data.summary || "").slice(0, MAX_SUMMARY_LENGTH);
+export default function ResumeTemplate({
+  data,
+  layout,
+  outputLanguage = "en",
+}: ResumeTemplateProps) {
+  const labels = PDF_LABELS[outputLanguage];
   const styles = createStyles(layout);
-
-  const contactParts = [contact.email, contact.phone, contact.location].filter(
-    Boolean,
+  const contact = data.contact || {};
+  const experience = (data.experience || []).filter((item) =>
+    Boolean(item.role || item.company || item.dates || item.bullets?.some(Boolean)),
   );
-  const profiles = contact.profiles || [];
+  const skills = (data.skills || []).filter(Boolean);
+  const education = (data.education || []).filter((item) =>
+    Boolean(item.institution || item.degree || item.year),
+  );
+  const contactParts = [contact.email, contact.phone, contact.location].filter(Boolean);
+  const profiles = (contact.profiles || []).filter(
+    (profile) => profile.platform || profile.url,
+  );
 
   return (
     <Document>
-      <Page size="A4" style={styles.page}>
+      <Page size="A4" style={styles.page} wrap>
         <Text style={styles.name}>{sanitize(contact.name || "")}</Text>
         {contactParts.length > 0 && (
           <View style={styles.contactRow}>
-            <Text>{contactParts.join("  |  ")}</Text>
+            <Text>{contactParts.map(sanitize).join("  |  ")}</Text>
           </View>
         )}
         {profiles.length > 0 && (
           <View style={styles.contactRow}>
             <Text>
-              {profiles.map((p) => `${p.platform}: ${p.url}`).join("  |  ")}
+              {profiles
+                .map(
+                  (profile) =>
+                    sanitize(profile.platform) + ": " + sanitize(profile.url),
+                )
+                .join("  |  ")}
             </Text>
           </View>
         )}
         <View style={styles.divider} />
 
-        {summary && (
+        {data.summary.trim() && (
           <View>
-            <Text style={styles.sectionTitle}>{t("pdf:summary")}</Text>
-            <Text style={styles.summaryText}>{sanitize(summary)}</Text>
+            <Text style={styles.sectionTitle} minPresenceAhead={30}>
+              {labels.summary}
+            </Text>
+            <Text style={styles.summaryText}>{sanitize(data.summary)}</Text>
           </View>
         )}
 
         {experience.length > 0 && (
           <View>
-            <Text style={styles.sectionTitle}>{t("pdf:experience")}</Text>
-            {experience.map((exp, i) => (
-              <ExperienceItem key={i} exp={exp} styles={styles} />
+            <Text style={styles.sectionTitle} minPresenceAhead={42}>
+              {labels.experience}
+            </Text>
+            {experience.map((item, index) => (
+              <ExperienceItem key={index} exp={item} styles={styles} />
             ))}
           </View>
         )}
 
         {skills.length > 0 && (
           <View>
-            <Text style={styles.sectionTitle}>{t("pdf:skills")}</Text>
+            <Text style={styles.sectionTitle} minPresenceAhead={30}>
+              {labels.skills}
+            </Text>
             <View style={styles.skillsContainer}>
-              {skills.map((skill, i) => (
-                <Text key={i} style={styles.skillItem}>
+              {skills.map((skill, index) => (
+                <Text key={index} style={styles.skillItem}>
                   {sanitize(skill)}
                 </Text>
               ))}
@@ -202,16 +227,16 @@ export default function ResumeTemplate({ data, layout }: ResumeTemplateProps) {
 
         {education.length > 0 && (
           <View>
-            <Text style={styles.sectionTitle}>{t("pdf:education")}</Text>
-            {education.map((edu, i) => (
-              <View key={i} style={styles.eduItem}>
+            <Text style={styles.sectionTitle} minPresenceAhead={30}>
+              {labels.education}
+            </Text>
+            {education.map((item, index) => (
+              <View key={index} style={styles.eduItem}>
                 <View>
-                  <Text style={styles.eduInstitution}>
-                    {sanitize(edu.institution)}
-                  </Text>
-                  <Text style={styles.eduDegree}>{sanitize(edu.degree)}</Text>
+                  <Text style={styles.eduInstitution}>{sanitize(item.institution)}</Text>
+                  <Text>{sanitize(item.degree)}</Text>
                 </View>
-                <Text style={styles.eduYear}>{sanitize(edu.year)}</Text>
+                <Text style={styles.eduYear}>{sanitize(item.year)}</Text>
               </View>
             ))}
           </View>

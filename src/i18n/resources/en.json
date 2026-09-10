@@ -6,7 +6,7 @@
     },
     "models": {
       "local": "Local Model",
-      "gpt4o": "GPT-4o"
+      "openai": "OpenAI"
     },
     "mode": {
       "label": "Mode",
@@ -36,7 +36,7 @@
       "idleDescription": "Enter your CV and a job description on the left, then click Generate to create a tailored resume.",
       "apiKeyRequired": "API Key Required",
       "generationFailed": "Generation Failed",
-      "apiKeyHelp": "Set VITE_OPENAI_API_KEY in your .env file, or configure VITE_LLM_BASE_URL for a local model.",
+      "apiKeyHelp": "Open Settings to add an OpenAI key or configure a local provider.",
       "tryAgain": "Try Again",
       "editor": "Editor",
       "preview": "Preview",
@@ -61,8 +61,8 @@
       "generic": "An unexpected error occurred",
       "pdfFailed": "Failed to generate PDF",
       "cvRequired": "CV text is required",
-      "apiKeyRequired": "API key is required. Set VITE_OPENAI_API_KEY for OpenAI or configure VITE_LLM_BASE_URL for a local model.",
-      "openaiKeyNotConfigured": "OpenAI API key not configured. Set VITE_OPENAI_API_KEY in your .env file.",
+      "apiKeyRequired": "A provider key or local endpoint is required. Open Settings to configure generation.",
+      "openaiKeyNotConfigured": "OpenAI API key is not configured. Open Settings to add it for this session.",
       "emptyResponse": "Empty response from LLM",
       "parseFailed": "Failed to parse LLM response as JSON. The model may have returned an unexpected format.",
       "invalidObject": "Invalid response: not a JSON object",
@@ -148,5 +148,133 @@
     "experience": "Experience",
     "skills": "Skills",
     "education": "Education"
+  },
+  "workspace": {
+    "loading": "Loading your CV library...",
+    "theme": {
+      "label": "Theme",
+      "system": "System",
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "actions": {
+      "close": "Close",
+      "settings": "Settings",
+      "newCV": "New CV",
+      "configure": "Configure",
+      "cancelGeneration": "Cancel generation",
+      "download": "Download PDF",
+      "duplicate": "Duplicate",
+      "delete": "Delete",
+      "more": "More actions",
+      "undo": "Undo",
+      "exportBackup": "Export backup",
+      "importBackup": "Import backup",
+      "openLibrary": "Open CV library",
+      "cancel": "Cancel",
+      "saveSettings": "Save settings"
+    },
+    "sidebar": {
+      "search": "Search CVs",
+      "noMatches": "No CVs found",
+      "noMatchesHelp": "Try another title.",
+      "emptyTitle": "Your library is empty",
+      "emptyHelp": "Create a draft to start building a CV.",
+      "generating": "Generating",
+      "generated": "Ready",
+      "interrupted": "Interrupted",
+      "draft": "Draft"
+    },
+    "tabs": {
+      "source": "Source",
+      "content": "Content",
+      "style": "Style"
+    },
+    "document": {
+      "title": "Document title",
+      "titlePlaceholder": "Untitled CV",
+      "navigation": "Document sections"
+    },
+    "source": {
+      "eyebrow": "Start with the source",
+      "outputLanguage": "CV language",
+      "using": "Using",
+      "providerMissing": "Generation is not configured yet. Your source and manual edits are still saved. Open Settings to connect a provider."
+    },
+    "content": {
+      "eyebrow": "Shape the result",
+      "title": "Edit your CV",
+      "description": "Changes save to this CV as you type. The preview stays tied to the same content."
+    },
+    "style": {
+      "eyebrow": "Set the page",
+      "title": "Make it yours",
+      "description": "Choose a quiet, readable treatment. These controls change the CV page, not the surrounding workspace.",
+      "font": "Document font",
+      "accent": "Accent color",
+      "reset": "Reset style"
+    },
+    "preview": {
+      "eyebrow": "Paper",
+      "live": "Live preview",
+      "mobileHint": "On a small screen, switch to the Preview tab in your browser to inspect the exported page.",
+      "editor": "Editor",
+      "preview": "Preview",
+      "preparing": "Preparing page preview...",
+      "updating": "Updating preview",
+      "canvasLabel": "Rendered CV page",
+      "previous": "Previous page",
+      "next": "Next page",
+      "page": "Page {{current}} of {{total}}"
+    },
+    "empty": {
+      "eyebrow": "Your document desk",
+      "title": "Keep every version close",
+      "description": "Create a CV for each role, keep the source beside the edited content, and return to the exact page you left.",
+      "hint": "Your library stays on this device"
+    },
+    "save": {
+      "saving": "Saving",
+      "saved": "Saved",
+      "failed": "Save failed",
+      "conflict": "This CV changed in another tab. Your edits are kept here.",
+      "asCopy": "Save my edits as a copy",
+      "reload": "Discard my edits and reload saved version",
+      "retry": "Retry saving"
+    },
+    "settings": {
+      "eyebrow": "Provider",
+      "title": "Generation settings",
+      "description": "Keys stay in memory for this browser session. Non-secret endpoint and model choices are saved with this CV.",
+      "local": "Local model",
+      "openai": "OpenAI",
+      "baseUrl": "Base URL",
+      "baseUrlHelp": "Use an OpenAI-compatible API base, including /v1 when your server expects it.",
+      "endpointOverride": "API base URL",
+      "endpointHelp": "The default is https://api.openai.com/v1. An override is useful for a compatible gateway.",
+      "apiKey": "API key",
+      "optional": "Optional",
+      "hideKey": "Hide API key",
+      "showKey": "Show API key",
+      "keyHelp": "The key is used only in this page session and is never included in backups.",
+      "modelId": "Model ID",
+      "modelPlaceholder": "Enter or discover a model ID",
+      "filterModels": "Filter discovered models",
+      "transport": "Transport",
+      "chat": "Chat Completions",
+      "responses": "Responses",
+      "test": "Test connection",
+      "refresh": "Refresh models",
+      "success": "Connection succeeded",
+      "connectionModels": "Connection succeeded. {{count}} models found.",
+      "connectionOk": "Connection succeeded. No model list was returned.",
+      "modelsRefreshed": "Model list refreshed.",
+      "connectionFailed": "Connection failed.",
+      "noModel": "No model selected"
+    },
+    "backup": {
+      "importFailed": "This backup could not be imported.",
+      "deleted": "CV deleted."
+    }
   }
 }

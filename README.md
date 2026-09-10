@@ -1,46 +1,46 @@
 # Custom CV Tailor
 
-A single-page React app that tailors your CV to a job description using an LLM (local or OpenAI) and generates an ATS-friendly PDF.
+Custom CV Tailor is a browser-local workspace for keeping several CV versions, tailoring them with a local or OpenAI-compatible model, editing the structured result, styling the page, and exporting a text-based PDF.
 
-> I made this project mainly for myself with the goal of testing **DeepSeek v4** with agent workflows using **OpenCode** as my harness. It has the option of using OpenAI models to generate the CV but I'm using it mainly with local models. My setup for local LLMs is **LM Studio** running **google/gemma-4-26b-a4b-qat** on an M4 Macbook Pro with 24GB of RAM. Testing the ouput on ATS analyzers such as Toptal I'm getting 80%-90% with this setup, your mileage may vary
+The library lives on the current browser and device. There are no accounts or cross-device sync in this iteration.
 
-> It needs more polish and feature work before deploying it, but if all you need is running this locally (which is the use case this project was designed for, hence the option for local LLMs being the default) it should to the trick.
+## Run locally
 
-> BTW DeepSeek is kinda underrated, I enjoy not being a slave of Claude rate limits.
+    npm install
+    npm run dev
 
-## How to run locally
+Open http://localhost:5173.
 
-```sh
-npm install
-npm run dev
-```
+## Provider setup
 
-Open [http://localhost:5173](http://localhost:5173) in your browser.
+Copy .env.example to .env when you want initial defaults for a local server:
 
-## LLM setup
+    VITE_LLM_BASE_URL=http://127.0.0.1:1234/v1
+    VITE_LLM_MODEL=your-local-model-id
 
-Copy `.env.example` to `.env` and configure:
+Then open Settings in the app. Local and OpenAI credentials are entered there, used only for the current page session, and excluded from JSON backups.
 
-| Variable              | Description                                    |
-| --------------------- | ---------------------------------------------- |
-| `VITE_LLM_BASE_URL`   | Local LLM endpoint (e.g. LM Studio, Ollama)    |
-| `VITE_LLM_MODEL`      | Model name for the local endpoint              |
-| `VITE_OPENAI_API_KEY` | OpenAI API key (only needed when using GPT-4o) |
+The local provider expects an OpenAI-compatible HTTP API with browser CORS enabled. The URL is used directly in development and production. OpenAI model discovery uses the account API key and does not run a billed generation request.
 
-In dev mode, the Vite proxy rewrites `/api/llm` to your local LLM URL.
+## Workspace behavior
+
+- New CV creates an independent draft immediately.
+- Source, Content, and Style tabs keep the source text, structured edits, and page styling together.
+- Switching documents restores each document's source, content, style, provider choice, and saved edits.
+- Delete has an undo action. Duplicate creates a new editable document.
+- Export backup writes editable documents to JSON without credentials. Import validates the input and creates new IDs.
+- The preview uses the same PDF blob generator as Download PDF, so the visible page and export share content and style.
+- The CV language is stored per document. Changing the interface language does not change an existing export.
 
 ## Commands
 
-| Command           | Description                 |
-| ----------------- | --------------------------- |
-| `npm run dev`     | Start dev server            |
-| `npm run build`   | Production build to `dist/` |
-| `npm run preview` | Preview production build    |
-| `npm run lint`    | Run oxlint                  |
+    npm run dev
+    npm run build
+    npm run lint
+    npm run typecheck
+    npm run test
+    npm run preview
 
-## Usage
+The test script covers pure provider URL and nested resume schema behavior. Browser checks remain important for IndexedDB persistence, provider CORS, PDF viewing, keyboard navigation, and narrow screens.
 
-1. Paste your CV and a job description into the input panel (or upload `.docx`/`.pdf` files).
-2. Select a model (Local or GPT-4o) in the header.
-3. Click generate — the app calls the LLM to rewrite your CV to match the job.
-4. Review the result and download it as a PDF.
+See overhaul-plan.md for the full implementation and acceptance checklist.

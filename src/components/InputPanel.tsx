@@ -1,33 +1,54 @@
 import { useState, useRef, useCallback } from "react";
-import type { ChangeEvent, DragEvent, FormEvent } from "react";
-import { Upload, FileText, Loader2, AlertCircle, Sparkles, Settings } from "lucide-react";
+import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent } from "react";
+import {
+  AlertCircle,
+  FileText,
+  Loader2,
+  Settings2,
+  Sparkles,
+  Upload,
+} from "lucide-react";
 import { clsx } from "clsx";
-import { useTranslation, Trans } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import { parseCVFile } from "../services/parserService";
-import type { Mode } from "../types";
+import type { Mode, OutputLanguage } from "../types";
 
 interface InputPanelProps {
   cvText: string;
   jdText: string;
+  cvFileName?: string;
+  outputLanguage: OutputLanguage;
   onCvChange: (text: string) => void;
   onJdChange: (text: string) => void;
+  onCvFileNameChange: (name: string | undefined) => void;
+  onOutputLanguageChange: (language: OutputLanguage) => void;
   onGenerate: () => void;
   canGenerate: boolean;
   isGenerating: boolean;
   mode: Mode;
   onModeChange: (mode: Mode) => void;
+  providerLabel: string;
+  providerConfigured: boolean;
+  onOpenSettings: () => void;
 }
 
 export default function InputPanel({
   cvText,
   jdText,
+  cvFileName,
+  outputLanguage,
   onCvChange,
   onJdChange,
+  onCvFileNameChange,
+  onOutputLanguageChange,
   onGenerate,
   canGenerate,
   isGenerating,
   mode,
   onModeChange,
+  providerLabel,
+  providerConfigured,
+  onOpenSettings,
 }: InputPanelProps) {
   const { t } = useTranslation();
   const [isParsing, setIsParsing] = useState(false);
@@ -42,125 +63,130 @@ export default function InputPanel({
       try {
         const text = await parseCVFile(file);
         onCvChange(text);
-      } catch (err) {
+        onCvFileNameChange(file.name);
+      } catch (error) {
         setParseError(
-          err instanceof Error ? err.message : t("common:errors.fileParseFailed"),
+          error instanceof Error
+            ? error.message
+            : t("common:errors.fileParseFailed"),
         );
       } finally {
         setIsParsing(false);
       }
     },
-    [onCvChange, t],
+    [onCvChange, onCvFileNameChange, t],
   );
 
   const handleDrop = useCallback(
-    (e: DragEvent<HTMLDivElement>) => {
-      e.preventDefault();
+    (event: DragEvent<HTMLDivElement>) => {
+      event.preventDefault();
       setIsDragging(false);
-      const file = e.dataTransfer.files[0];
-      if (file) handleFile(file);
+      const file = event.dataTransfer.files[0];
+      if (file) void handleFile(file);
     },
     [handleFile],
   );
 
-  const handleDragOver = useCallback((e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(true);
-  }, []);
+  const handleDropKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      fileInputRef.current?.click();
+    }
+  };
 
-  const handleDragLeave = useCallback((e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(false);
-  }, []);
-
-  const handleFileSelect = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (file) handleFile(file);
-      e.target.value = "";
-    },
-    [handleFile],
-  );
-
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     if (canGenerate) onGenerate();
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="bg-white rounded-xl border border-surface-200 p-6 space-y-6"
-    >
-      <h2 className="text-lg font-semibold text-surface-900">
-        {t("common:inputPanel.heading")}
-      </h2>
+    <form onSubmit={handleSubmit} className="space-y-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="eyebrow">{t("workspace:source.eyebrow")}</p>
+          <h2 className="mt-1 text-lg font-semibold tracking-tight text-(--ui-text)">
+            {t("common:inputPanel.heading")}
+          </h2>
+        </div>
+        <label className="space-y-1.5">
+          <span className="field-label">{t("workspace:source.outputLanguage")}</span>
+          <select
+            value={outputLanguage}
+            onChange={(event) => onOutputLanguageChange(event.target.value as OutputLanguage)}
+            className="ui-control min-w-32"
+          >
+            <option value="en">{t("common:language.en")}</option>
+            <option value="es">{t("common:language.es")}</option>
+          </select>
+        </label>
+      </div>
 
-      <div className="space-y-1">
-        <label className="text-sm font-medium text-surface-700 flex items-center gap-1.5">
-          <Settings className="w-4 h-4" />
+      <div className="ui-inset space-y-2">
+        <label className="field-label flex items-center gap-1.5">
+          <Settings2 className="h-3.5 w-3.5" />
           {t("common:mode.label")}
         </label>
-        <div className="flex rounded-lg border border-surface-200 p-0.5 bg-surface-100">
-          <button
-            type="button"
-            onClick={() => onModeChange("tailor")}
-            className={clsx(
-              "flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors",
-              mode === "tailor"
-                ? "bg-white text-surface-900 shadow-sm"
-                : "text-surface-500 hover:text-surface-700",
-            )}
-          >
-            {t("common:mode.tailor")}
-          </button>
-          <button
-            type="button"
-            onClick={() => onModeChange("format")}
-            className={clsx(
-              "flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors",
-              mode === "format"
-                ? "bg-white text-surface-900 shadow-sm"
-                : "text-surface-500 hover:text-surface-700",
-            )}
-          >
-            {t("common:mode.format")}
-          </button>
+        <div className="flex rounded-lg border border-(--ui-border) bg-(--ui-panel) p-0.5">
+          {(["tailor", "format"] as const).map((item) => (
+            <button
+              key={item}
+              type="button"
+              onClick={() => onModeChange(item)}
+              className={clsx(
+                "flex-1 rounded-md px-3 py-2 text-sm font-medium transition",
+                mode === item
+                  ? "bg-brand-600 text-white shadow-sm"
+                  : "text-(--ui-muted) hover:text-(--ui-text)",
+              )}
+            >
+              {item === "tailor" ? t("common:mode.tailor") : t("common:mode.format")}
+            </button>
+          ))}
         </div>
+        <p className="text-xs leading-5 text-(--ui-muted)">
+          {mode === "tailor"
+            ? t("common:mode.tailorDescription")
+            : t("common:mode.formatDescription")}
+        </p>
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium text-surface-700">
-          {t("common:inputPanel.uploadLabel")}
-        </label>
+        <label className="field-label">{t("common:inputPanel.uploadLabel")}</label>
         <div
+          role="button"
+          tabIndex={0}
+          onKeyDown={handleDropKeyDown}
           onDrop={handleDrop}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
+          onDragOver={(event) => {
+            event.preventDefault();
+            setIsDragging(true);
+          }}
+          onDragLeave={(event) => {
+            event.preventDefault();
+            setIsDragging(false);
+          }}
           onClick={() => fileInputRef.current?.click()}
           className={clsx(
-            "border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors",
+            "cursor-pointer rounded-xl border border-dashed p-5 text-center transition",
             isDragging
-              ? "border-brand-500 bg-brand-50"
-              : "border-surface-200 hover:border-surface-300 hover:bg-surface-50",
+              ? "border-(--ui-focus) bg-(--ui-subtle)"
+              : "border-(--ui-border-strong) hover:border-brand-400 hover:bg-(--ui-subtle)",
           )}
         >
           {isParsing ? (
-            <div className="flex flex-col items-center gap-2 text-surface-500">
-              <Loader2 className="w-8 h-8 animate-spin" />
+            <div className="flex flex-col items-center gap-2 text-(--ui-muted)">
+              <Loader2 className="h-7 w-7 animate-spin" />
               <span className="text-sm">{t("common:inputPanel.parsingFile")}</span>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2">
-              <Upload className="w-8 h-8 text-surface-400" />
-              <span className="text-sm text-surface-500">
-                <Trans i18nKey="common:inputPanel.dropHere">
-                  Drop your CV here or{" "}
-                  <span className="text-brand-600 font-medium">browse</span>
-                </Trans>
+              <Upload className="h-7 w-7 text-(--ui-focus)" />
+              <span className="text-sm text-(--ui-text-soft)">
+                {t("common:inputPanel.dropHere")}
+                <span className="font-semibold text-(--ui-focus)">{t("common:inputPanel.browse")}</span>
               </span>
-              <span className="text-xs text-surface-400">
-                {t("common:inputPanel.supportsFormats")}
+              <span className="text-xs text-(--ui-muted)">
+                {cvFileName || t("common:inputPanel.supportsFormats")}
               </span>
             </div>
           )}
@@ -168,76 +194,91 @@ export default function InputPanel({
             ref={fileInputRef}
             type="file"
             accept=".docx,.pdf"
-            onChange={handleFileSelect}
+            onChange={(event: ChangeEvent<HTMLInputElement>) => {
+              const file = event.target.files?.[0];
+              if (file) void handleFile(file);
+              event.target.value = "";
+            }}
             className="hidden"
           />
         </div>
         {parseError && (
-          <div className="flex items-center gap-2 text-red-600 text-sm">
-            <AlertCircle className="w-4 h-4 shrink-0" />
+          <div className="flex items-center gap-2 text-sm text-red-600" role="alert">
+            <AlertCircle className="h-4 w-4 shrink-0" />
             {parseError}
           </div>
         )}
       </div>
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-surface-700 flex items-center gap-2">
-          <FileText className="w-4 h-4" />
+      <label className="block space-y-2">
+        <span className="field-label flex items-center gap-2">
+          <FileText className="h-3.5 w-3.5" />
           {t("common:inputPanel.cvLabel")}
-        </label>
+        </span>
         <textarea
           value={cvText}
-          onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
-            onCvChange(e.target.value)
-          }
+          onChange={(event) => onCvChange(event.target.value)}
           placeholder={t("common:inputPanel.cvPlaceholder")}
-          rows={10}
-          className="w-full rounded-lg border border-surface-200 bg-surface-50 p-3 text-sm text-surface-800 placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-y"
+          rows={11}
+          className="ui-textarea"
         />
-      </div>
+      </label>
 
       {mode === "tailor" && (
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-surface-700 flex items-center gap-2">
-            <FileText className="w-4 h-4" />
+        <label className="block space-y-2">
+          <span className="field-label flex items-center gap-2">
+            <FileText className="h-3.5 w-3.5" />
             {t("common:inputPanel.jdLabel")}
-          </label>
+          </span>
           <textarea
             value={jdText}
-            onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
-              onJdChange(e.target.value)
-            }
+            onChange={(event) => onJdChange(event.target.value)}
             placeholder={t("common:inputPanel.jdPlaceholder")}
-            rows={10}
-            className="w-full rounded-lg border border-surface-200 bg-surface-50 p-3 text-sm text-surface-800 placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent resize-y"
+            rows={9}
+            className="ui-textarea"
           />
-        </div>
+        </label>
       )}
 
-      <button
-        type="submit"
-        disabled={!canGenerate}
-        className={clsx(
-          "w-full py-3 rounded-lg font-medium text-sm flex items-center justify-center gap-2 transition-colors",
-          canGenerate
-            ? "bg-brand-600 text-white hover:bg-brand-700 cursor-pointer"
-            : "bg-surface-200 text-surface-400 cursor-not-allowed",
+      <div className="border-t border-(--ui-border) pt-4">
+        <div className="mb-3 flex items-center justify-between gap-3 text-xs">
+          <span className="text-(--ui-muted)">
+            {t("workspace:source.using")} <span className="font-medium text-(--ui-text-soft)">{providerLabel}</span>
+          </span>
+          <button type="button" onClick={onOpenSettings} className="font-semibold text-(--ui-focus) hover:text-(--ui-text)">
+            {t("workspace:actions.configure")}
+          </button>
+        </div>
+        {!providerConfigured && (
+          <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-800">
+            {t("workspace:source.providerMissing")}
+          </div>
         )}
-      >
-{isGenerating ? (
+        <button
+          type="submit"
+          disabled={!canGenerate}
+          className={clsx(
+            "flex w-full items-center justify-center gap-2 rounded-lg py-3 text-sm font-semibold transition",
+            canGenerate
+              ? "bg-brand-600 text-white shadow-sm hover:bg-brand-700"
+              : "cursor-not-allowed bg-(--ui-border) text-(--ui-muted)",
+          )}
+        >
+          {isGenerating ? (
             <>
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin" />
               {t("common:inputPanel.generating")}
             </>
           ) : (
             <>
-              <Sparkles className="w-4 h-4" />
+              <Sparkles className="h-4 w-4" />
               {mode === "format"
                 ? t("common:inputPanel.formatCV")
                 : t("common:inputPanel.generate")}
             </>
           )}
-      </button>
+        </button>
+      </div>
     </form>
   );
 }

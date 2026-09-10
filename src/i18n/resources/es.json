@@ -6,7 +6,7 @@
     },
     "models": {
       "local": "Modelo Local",
-      "gpt4o": "GPT-4o"
+      "openai": "OpenAI"
     },
     "mode": {
       "label": "Modo",
@@ -36,7 +36,7 @@
       "idleDescription": "Introduce tu CV y una oferta de trabajo a la izquierda, luego haz clic en Generar para crear un CV personalizado.",
       "apiKeyRequired": "API Key Requerida",
       "generationFailed": "Error de Generación",
-      "apiKeyHelp": "Configura VITE_OPENAI_API_KEY en tu archivo .env, o configura VITE_LLM_BASE_URL para un modelo local.",
+      "apiKeyHelp": "Abre Ajustes para añadir una clave de OpenAI o configurar un proveedor local.",
       "tryAgain": "Intentar de nuevo",
       "editor": "Editor",
       "preview": "Vista previa",
@@ -61,8 +61,8 @@
       "generic": "Ocurrió un error inesperado",
       "pdfFailed": "Error al generar PDF",
       "cvRequired": "El texto del CV es obligatorio",
-      "apiKeyRequired": "API key requerida. Configura VITE_OPENAI_API_KEY para OpenAI o VITE_LLM_BASE_URL para un modelo local.",
-      "openaiKeyNotConfigured": "API key de OpenAI no configurada. Configura VITE_OPENAI_API_KEY en tu archivo .env.",
+      "apiKeyRequired": "Se necesita una clave o una URL local. Abre Ajustes para configurar la generación.",
+      "openaiKeyNotConfigured": "La API key de OpenAI no está configurada. Abre Ajustes para añadirla durante esta sesión.",
       "emptyResponse": "Respuesta vacía del LLM",
       "parseFailed": "Error al analizar la respuesta del LLM como JSON. El modelo puede haber devuelto un formato inesperado.",
       "invalidObject": "Respuesta inválida: no es un objeto JSON",
@@ -148,5 +148,133 @@
     "experience": "Experiencia",
     "skills": "Habilidades",
     "education": "Formación"
+  },
+  "workspace": {
+    "loading": "Cargando tu biblioteca de CV...",
+    "theme": {
+      "label": "Tema",
+      "system": "Sistema",
+      "light": "Claro",
+      "dark": "Oscuro"
+    },
+    "actions": {
+      "close": "Cerrar",
+      "settings": "Ajustes",
+      "newCV": "Nuevo CV",
+      "configure": "Configurar",
+      "cancelGeneration": "Cancelar generación",
+      "download": "Descargar PDF",
+      "duplicate": "Duplicar",
+      "delete": "Eliminar",
+      "more": "Más acciones",
+      "undo": "Deshacer",
+      "exportBackup": "Exportar copia",
+      "importBackup": "Importar copia",
+      "openLibrary": "Abrir biblioteca de CV",
+      "cancel": "Cancelar",
+      "saveSettings": "Guardar ajustes"
+    },
+    "sidebar": {
+      "search": "Buscar CVs",
+      "noMatches": "No se encontraron CVs",
+      "noMatchesHelp": "Prueba con otro título.",
+      "emptyTitle": "Tu biblioteca está vacía",
+      "emptyHelp": "Crea un borrador para empezar un CV.",
+      "generating": "Generando",
+      "generated": "Listo",
+      "interrupted": "Interrumpido",
+      "draft": "Borrador"
+    },
+    "tabs": {
+      "source": "Fuente",
+      "content": "Contenido",
+      "style": "Estilo"
+    },
+    "document": {
+      "title": "Título del documento",
+      "titlePlaceholder": "CV sin título",
+      "navigation": "Secciones del documento"
+    },
+    "source": {
+      "eyebrow": "Empieza con la fuente",
+      "outputLanguage": "Idioma del CV",
+      "using": "Usando",
+      "providerMissing": "La generación aún no está configurada. La fuente y las ediciones manuales siguen guardadas. Abre Ajustes para conectar un proveedor."
+    },
+    "content": {
+      "eyebrow": "Da forma al resultado",
+      "title": "Edita tu CV",
+      "description": "Los cambios se guardan en este CV mientras escribes. La vista previa usa el mismo contenido."
+    },
+    "style": {
+      "eyebrow": "Configura la página",
+      "title": "Hazlo tuyo",
+      "description": "Elige un diseño legible y sobrio. Estos controles cambian la página del CV, no el espacio de trabajo.",
+      "font": "Fuente del documento",
+      "accent": "Color de acento",
+      "reset": "Restablecer estilo"
+    },
+    "preview": {
+      "eyebrow": "Papel",
+      "live": "Vista previa en directo",
+      "mobileHint": "En una pantalla pequeña, abre el PDF exportado en el navegador para revisar la página.",
+      "editor": "Editor",
+      "preview": "Vista previa",
+      "preparing": "Preparando la vista previa...",
+      "updating": "Actualizando vista previa",
+      "canvasLabel": "Página del CV renderizada",
+      "previous": "Página anterior",
+      "next": "Página siguiente",
+      "page": "Página {{current}} de {{total}}"
+    },
+    "empty": {
+      "eyebrow": "Tu escritorio de documentos",
+      "title": "Conserva cada versión cerca",
+      "description": "Crea un CV para cada puesto, mantén la fuente junto al contenido editado y vuelve a la página exacta donde lo dejaste.",
+      "hint": "Tu biblioteca se queda en este dispositivo"
+    },
+    "save": {
+      "saving": "Guardando",
+      "saved": "Guardado",
+      "failed": "Error al guardar",
+      "conflict": "Este CV cambió en otra pestaña. Tus cambios se conservan aquí.",
+      "asCopy": "Guardar mis cambios como copia",
+      "reload": "Descartar mis cambios y cargar la versión guardada",
+      "retry": "Reintentar guardar"
+    },
+    "settings": {
+      "eyebrow": "Proveedor",
+      "title": "Ajustes de generación",
+      "description": "Las claves permanecen en memoria durante esta sesión. La URL y el modelo, que no son secretos, se guardan con este CV.",
+      "local": "Modelo local",
+      "openai": "OpenAI",
+      "baseUrl": "URL base",
+      "baseUrlHelp": "Usa la base de una API compatible con OpenAI, incluido /v1 si tu servidor lo necesita.",
+      "endpointOverride": "URL base de API",
+      "endpointHelp": "El valor predeterminado es https://api.openai.com/v1. Un reemplazo sirve para una pasarela compatible.",
+      "apiKey": "API key",
+      "optional": "Opcional",
+      "hideKey": "Ocultar API key",
+      "showKey": "Mostrar API key",
+      "keyHelp": "La clave solo se usa durante esta sesión y nunca se incluye en las copias de seguridad.",
+      "modelId": "ID del modelo",
+      "modelPlaceholder": "Escribe o descubre un ID de modelo",
+      "filterModels": "Filtrar modelos descubiertos",
+      "transport": "Transporte",
+      "chat": "Chat Completions",
+      "responses": "Responses",
+      "test": "Probar conexión",
+      "refresh": "Actualizar modelos",
+      "success": "Conexión correcta",
+      "connectionModels": "Conexión correcta. Se encontraron {{count}} modelos.",
+      "connectionOk": "Conexión correcta. No se devolvió una lista de modelos.",
+      "modelsRefreshed": "Lista de modelos actualizada.",
+      "connectionFailed": "La conexión falló.",
+      "noModel": "Ningún modelo seleccionado"
+    },
+    "backup": {
+      "importFailed": "No se pudo importar esta copia.",
+      "deleted": "CV eliminado."
+    }
   }
 }

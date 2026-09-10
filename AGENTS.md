@@ -1,50 +1,56 @@
-# AGENTS.md
+# AGENTS.md instructions for /Users/josefran/custom-cv
 
 ## Commands
 
-```sh
-npm run dev      # start dev server (default http://localhost:5173)
-npm run build    # production build → dist/
-npm run lint     # oxlint (react + oxc plugins)
-npm run preview  # preview production build locally
-```
+    npm run dev       # start dev server (default http://localhost:5173)
+    npm run build     # production build -> dist/
+    npm run lint      # oxlint
+    npm run typecheck # TypeScript validation
+    npm run test      # focused pure-function regression checks
+    npm run preview   # preview production build locally
 
-There is no test script, no typechecking, and no TypeScript in this repo — all source files are `.js` / `.jsx`.
+The source is TypeScript in src/. Browser persistence and PDF rendering still need browser verification in addition to these checks.
 
 ## Environment
 
-Copy `.env.example` to `.env` and configure:
+Copy .env.example to .env for non-secret local provider defaults. Configure provider keys in the Settings panel. Keys stay in memory for the current page session and are not included in backups.
 
-- **Local LLM (default):** `VITE_LLM_BASE_URL` and `VITE_LLM_MODEL`. In dev, the Vite dev server proxies `/api/llm` → the local LLM URL (see `vite.config.js`). In production, `VITE_LLM_BASE_URL` is called directly.
-- **OpenAI:** set `VITE_OPENAI_API_KEY` and switch the UI dropdown to "GPT-4o".
-
-All `VITE_*` env vars are bundled client-side at build time — they are not secrets.
+The local endpoint is called directly in development and production. A local server must allow browser CORS. The app no longer uses a fixed development proxy.
 
 ## Architecture
 
-Single-page React app with no router:
+This is a single-page React app with a browser-local document workspace:
 
-```
-src/
-  main.jsx            # entry point
-  App.jsx             # root component — holds all state, orchestrates generation flow
-  components/
-    Header.jsx        # model picker dropdown (local / GPT-4o)
-    InputPanel.jsx    # CV & JD textareas, drag-and-drop .docx/.pdf upload
-    PreviewPanel.jsx  # idle / loading / success / error states + PDF download button
-  services/
-    openaiService.js  # LLM call (OpenAI-compatible), JSON schema validation, response cleaning
-    parserService.js  # mammoth (.docx) and pdfjs-dist (.pdf) → plain text
-    pdfService.jsx    # @react-pdf/renderer blob generation + browser download trigger
-  templates/
-    ResumeTemplate.jsx # PDF layout: single-column A4, Helvetica, text-based (ATS-friendly)
-```
+    src/
+      main.tsx
+      App.tsx
+      components/
+        Header.tsx
+        WorkspaceSidebar.tsx
+        DocumentToolbar.tsx
+        DocumentEditor.tsx
+        ProviderSettingsDialog.tsx
+        InputPanel.tsx
+        Resume*Editor.tsx
+        VisualPreview.tsx
+      hooks/
+        useDocuments.ts
+        useTheme.ts
+      services/
+        documentRepository.ts
+        llmService.ts
+        parserService.ts
+        pdfService.tsx
+      templates/
+        ResumeTemplate.tsx
 
 ## Key implementation notes
 
-- **Two LLM backends** selected via the `model` state (`'local'` | `'openai'`). The OpenAI client always runs in the browser (`dangerouslyAllowBrowser: true`). In local mode, the Vite proxy rewrites `/api/llm` → the local base URL in dev; in prod it connects directly.
-- **JSON schema enforcement:** `openaiService.js` validates the LLM response client-side (contact, summary, experience, skills, education). `cleanJSONResponse()` strips markdown fences because local models often wrap JSON in them.
-- **PDF generation** uses `@react-pdf/renderer` — NOT html2canvas or image-based approaches. The PDF is text-selectable (required for ATS).
-- **File upload** accepts `.docx` and `.pdf` only. `mammoth` extracts from docx; `pdfjs-dist` is lazy-loaded for PDFs with a Vite URL-based worker setup.
-- **Tailwind CSS v4** with the `@tailwindcss/vite` plugin. Theme tokens (`brand-*`, `surface-*`) are defined via `@theme` in `src/index.css` — there is no `tailwind.config.js`.
-- **`instructions.md`** is the original design/implementation plan document, not a living spec. The actual code may diverge.
+- CV documents live in IndexedDB and use schema validation plus revision checks. A small JSON backup path is available from the library sidebar.
+- Provider configuration is runtime state. OpenAI and local credentials are provider-scoped, memory-only, and never serialized.
+- The local provider uses a user-entered OpenAI-compatible base URL directly. The OpenAI provider supports Chat Completions and Responses transport selection.
+- Generated resume data is validated deeply before it can replace the current document.
+- PDF export uses text-based @react-pdf/renderer. The visible PDF preview and download share the same blob-producing function.
+- PDF page layout does not silently slice sections. It wraps to additional pages, with built-in Helvetica or Times-Roman fonts and four curated accents.
+- Tailwind CSS v4 is configured through the @tailwindcss/vite plugin. Semantic UI tokens support light, dark, and system themes; CV page colors remain independent.
+- File upload accepts DOCX and PDF. mammoth extracts DOCX text and pdfjs-dist extracts PDF text.
