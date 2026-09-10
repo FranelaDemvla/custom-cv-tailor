@@ -400,7 +400,7 @@ export default function App() {
                 provider={activeProvider}
                 saveState={saveStates[activeDocument.id] || "saved"}
                 isGenerating={currentGeneration}
-                onTitleChange={(title) => handleUpdate((document) => ({ ...document, title: title || t("workspace:document.titlePlaceholder") }))}
+                onTitleChange={(title) => handleUpdate((document) => ({ ...document, title }))}
                 onDuplicate={() => { void runAction(handleDuplicate); }}
                 onDelete={() => { void runAction(handleDelete); }}
                 onDownload={() => { void runAction(handleDownload); }}

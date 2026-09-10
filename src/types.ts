@@ -133,7 +133,7 @@ export function createEmptyDocument(provider: ProviderSettings): CVDocument {
   return {
     id: createId(),
     schemaVersion: 1,
-    title: "Untitled CV",
+    title: "",
     createdAt: now,
     updatedAt: now,
     revision: 0,

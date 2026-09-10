@@ -80,9 +80,9 @@ function normalizeDocument(value: unknown, rekey = false): CVDocument {
   return {
     id: rekey || typeof record.id !== "string" ? createId() : record.id,
     schemaVersion: 1,
-    title: typeof record.title === "string" && record.title.trim()
+    title: typeof record.title === "string"
       ? record.title.trim().slice(0, 120)
-      : "Untitled CV",
+      : "",
     createdAt: typeof record.createdAt === "string" ? record.createdAt : now,
     updatedAt: typeof record.updatedAt === "string" ? record.updatedAt : now,
     revision: typeof record.revision === "number" && Number.isInteger(record.revision)
