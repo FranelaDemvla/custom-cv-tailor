@@ -236,15 +236,6 @@ button:focus-visible,
   box-shadow: 0 24px 70px rgba(14, 22, 35, 0.25);
 }
 
-.eyebrow {
-  color: var(--ui-muted);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.13em;
-  line-height: 1.2;
-  text-transform: uppercase;
-}
-
 .field-label {
   color: var(--ui-text-soft);
   font-size: 12px;

@@ -1,8 +1,7 @@
 {
   "common": {
     "app": {
-      "title": "ATS CV Tailor",
-      "subtitle": "AI-Powered Resume Optimization"
+      "title": "ATS CV Tailor"
     },
     "models": {
       "local": "Local Model",
@@ -196,28 +195,23 @@
       "navigation": "Document sections"
     },
     "source": {
-      "eyebrow": "Start with the source",
       "outputLanguage": "CV language",
       "using": "Using",
-      "providerMissing": "Generation is not configured yet. Your source and manual edits are still saved. Open Settings to connect a provider."
+      "providerMissing": "Configure a provider to generate a CV. Your edits are saved."
     },
     "content": {
-      "eyebrow": "Shape the result",
-      "title": "Edit your CV",
-      "description": "Changes save to this CV as you type. The preview stays tied to the same content."
+      "title": "CV content",
+      "description": "Edit the information shown in the CV."
     },
     "style": {
-      "eyebrow": "Set the page",
-      "title": "Make it yours",
-      "description": "Choose a quiet, readable treatment. These controls change the CV page, not the surrounding workspace.",
+      "title": "CV style",
+      "description": "Set the page layout, font, and accent color.",
       "font": "Document font",
       "accent": "Accent color",
       "reset": "Reset style"
     },
     "preview": {
-      "eyebrow": "Paper",
-      "live": "Live preview",
-      "mobileHint": "On a small screen, switch to the Preview tab in your browser to inspect the exported page.",
+      "mobileHint": "Use the Preview tab to view the rendered CV.",
       "editor": "Editor",
       "preview": "Preview",
       "preparing": "Preparing page preview...",
@@ -228,10 +222,8 @@
       "page": "Page {{current}} of {{total}}"
     },
     "empty": {
-      "eyebrow": "Your document desk",
-      "title": "Keep every version close",
-      "description": "Create a CV for each role, keep the source beside the edited content, and return to the exact page you left.",
-      "hint": "Your library stays on this device"
+      "title": "No CV open",
+      "description": "Create a CV to start editing."
     },
     "save": {
       "saving": "Saving",
@@ -243,9 +235,8 @@
       "retry": "Retry saving"
     },
     "settings": {
-      "eyebrow": "Provider",
       "title": "Generation settings",
-      "description": "Keys stay in memory for this browser session. Non-secret endpoint and model choices are saved with this CV.",
+      "description": "Configure the model and connection used to generate a CV. API keys remain in this browser session.",
       "local": "Local model",
       "openai": "OpenAI",
       "baseUrl": "Base URL",

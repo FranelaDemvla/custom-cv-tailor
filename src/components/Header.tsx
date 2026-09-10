@@ -32,9 +32,6 @@ export default function Header({
           <h1 className="text-sm font-semibold tracking-tight text-(--ui-text)">
             {t("common:app.title")}
           </h1>
-          <p className="hidden text-[11px] text-(--ui-muted) sm:block">
-            {t("common:app.subtitle")}
-          </p>
         </div>
 
         <div className="ml-auto flex items-center gap-2">

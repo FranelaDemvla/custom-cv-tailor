@@ -1,8 +1,7 @@
 {
   "common": {
     "app": {
-      "title": "ATS CV Tailor",
-      "subtitle": "Optimización de CV con IA"
+      "title": "ATS CV Tailor"
     },
     "models": {
       "local": "Modelo Local",
@@ -196,28 +195,23 @@
       "navigation": "Secciones del documento"
     },
     "source": {
-      "eyebrow": "Empieza con la fuente",
       "outputLanguage": "Idioma del CV",
       "using": "Usando",
-      "providerMissing": "La generación aún no está configurada. La fuente y las ediciones manuales siguen guardadas. Abre Ajustes para conectar un proveedor."
+      "providerMissing": "Configura un proveedor para generar un CV. Tus cambios se guardan."
     },
     "content": {
-      "eyebrow": "Da forma al resultado",
-      "title": "Edita tu CV",
-      "description": "Los cambios se guardan en este CV mientras escribes. La vista previa usa el mismo contenido."
+      "title": "Contenido del CV",
+      "description": "Edita la información que aparece en el CV."
     },
     "style": {
-      "eyebrow": "Configura la página",
-      "title": "Hazlo tuyo",
-      "description": "Elige un diseño legible y sobrio. Estos controles cambian la página del CV, no el espacio de trabajo.",
+      "title": "Estilo del CV",
+      "description": "Configura el diseño de página, la fuente y el color de acento.",
       "font": "Fuente del documento",
       "accent": "Color de acento",
       "reset": "Restablecer estilo"
     },
     "preview": {
-      "eyebrow": "Papel",
-      "live": "Vista previa en directo",
-      "mobileHint": "En una pantalla pequeña, abre el PDF exportado en el navegador para revisar la página.",
+      "mobileHint": "Usa la pestaña Vista previa para ver el CV renderizado.",
       "editor": "Editor",
       "preview": "Vista previa",
       "preparing": "Preparando la vista previa...",
@@ -228,10 +222,8 @@
       "page": "Página {{current}} de {{total}}"
     },
     "empty": {
-      "eyebrow": "Tu escritorio de documentos",
-      "title": "Conserva cada versión cerca",
-      "description": "Crea un CV para cada puesto, mantén la fuente junto al contenido editado y vuelve a la página exacta donde lo dejaste.",
-      "hint": "Tu biblioteca se queda en este dispositivo"
+      "title": "No hay ningún CV abierto",
+      "description": "Crea un CV para empezar a editar."
     },
     "save": {
       "saving": "Guardando",
@@ -243,9 +235,8 @@
       "retry": "Reintentar guardar"
     },
     "settings": {
-      "eyebrow": "Proveedor",
       "title": "Ajustes de generación",
-      "description": "Las claves permanecen en memoria durante esta sesión. La URL y el modelo, que no son secretos, se guardan con este CV.",
+      "description": "Configura el modelo y la conexión para generar un CV. Las claves de API permanecen en esta sesión del navegador.",
       "local": "Modelo local",
       "openai": "OpenAI",
       "baseUrl": "URL base",

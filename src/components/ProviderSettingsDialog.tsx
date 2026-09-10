@@ -147,8 +147,7 @@ export default function ProviderSettingsDialog({
       >
         <div className="flex shrink-0 items-start justify-between gap-4 border-b border-(--ui-border) px-6 py-5">
           <div>
-            <p className="eyebrow">{t("workspace:settings.eyebrow")}</p>
-            <h2 id="provider-settings-title" className="mt-1 text-xl font-semibold text-(--ui-text)">
+            <h2 id="provider-settings-title" className="text-xl font-semibold text-(--ui-text)">
               {t("workspace:settings.title")}
             </h2>
             <p className="mt-1 text-sm text-(--ui-muted)">

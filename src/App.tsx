@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import i18next from "i18next";
-import { Menu, PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
+import { Menu, PanelLeftOpen, X } from "lucide-react";
 import Header from "./components/Header";
 import WorkspaceSidebar from "./components/WorkspaceSidebar";
 import DocumentToolbar from "./components/DocumentToolbar";
@@ -443,11 +443,7 @@ export default function App() {
                 <section className={mobilePane === "preview" ? "block min-h-0 border-l border-(--ui-border) bg-(--ui-workspace) p-4 xl:block xl:overflow-y-auto xl:p-6" : "hidden xl:block min-h-0 border-l border-(--ui-border) bg-(--ui-workspace) p-4 xl:overflow-y-auto xl:p-6"}>
                   <div className="mx-auto max-w-2xl">
                     <div className="mb-3 flex items-center justify-between gap-3">
-                      <div>
-                        <p className="eyebrow">{t("workspace:preview.eyebrow")}</p>
-                        <h2 className="mt-1 text-sm font-semibold text-(--ui-text)">{t("common:preview.heading")}</h2>
-                      </div>
-                      <span className="text-xs text-(--ui-muted)">{t("workspace:preview.live")}</span>
+                      <h2 className="text-sm font-semibold text-(--ui-text)">{t("common:preview.heading")}</h2>
                     </div>
                     <VisualPreview
                       data={activeDocument.data}
@@ -464,16 +460,11 @@ export default function App() {
                 <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-50 text-brand-700">
                   <PanelLeftOpen className="h-6 w-6" />
                 </div>
-                <p className="eyebrow mt-6">{t("workspace:empty.eyebrow")}</p>
-                <h2 className="mt-2 font-serif text-3xl tracking-tight text-(--ui-text)">{t("workspace:empty.title")}</h2>
+                <h2 className="mt-6 font-serif text-3xl tracking-tight text-(--ui-text)">{t("workspace:empty.title")}</h2>
                 <p className="mt-3 text-sm leading-6 text-(--ui-muted)">{t("workspace:empty.description")}</p>
                 <button type="button" onClick={() => { void runAction(handleCreate); }} className="ui-primary-button mt-6">
                   {t("workspace:actions.newCV")}
                 </button>
-                <div className="mt-8 flex items-center justify-center gap-2 text-xs text-(--ui-muted)">
-                  <PanelLeftClose className="h-3.5 w-3.5" />
-                  {t("workspace:empty.hint")}
-                </div>
               </div>
             </div>
           )}

@@ -11,6 +11,10 @@
 
 The source is TypeScript in src/. Browser persistence and PDF rendering still need browser verification in addition to these checks.
 
+## Git conventions
+
+Use Conventional Commits for all new commits, for example `feat: add CV import` or `fix: preserve empty document titles`.
+
 ## Environment
 
 Copy .env.example to .env for non-secret local provider defaults. Configure provider keys in the Settings panel. Keys stay in memory for the current page session and are not included in backups.

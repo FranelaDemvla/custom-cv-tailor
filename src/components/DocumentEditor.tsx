@@ -115,8 +115,7 @@ export default function DocumentEditor({
         {activeTab === "content" && (
           <div className="space-y-5">
             <div>
-              <p className="eyebrow">{t("workspace:content.eyebrow")}</p>
-              <h2 className="mt-1 text-lg font-semibold tracking-tight text-(--ui-text)">
+              <h2 className="text-lg font-semibold tracking-tight text-(--ui-text)">
                 {t("workspace:content.title")}
               </h2>
               <p className="mt-1 text-sm leading-6 text-(--ui-muted)">
@@ -136,8 +135,7 @@ export default function DocumentEditor({
         {activeTab === "style" && (
           <div className="space-y-5">
             <div>
-              <p className="eyebrow">{t("workspace:style.eyebrow")}</p>
-              <h2 className="mt-1 text-lg font-semibold tracking-tight text-(--ui-text)">
+              <h2 className="text-lg font-semibold tracking-tight text-(--ui-text)">
                 {t("workspace:style.title")}
               </h2>
               <p className="mt-1 text-sm leading-6 text-(--ui-muted)">

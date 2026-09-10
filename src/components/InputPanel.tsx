@@ -103,8 +103,7 @@ export default function InputPanel({
     <form onSubmit={handleSubmit} className="space-y-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="eyebrow">{t("workspace:source.eyebrow")}</p>
-          <h2 className="mt-1 text-lg font-semibold tracking-tight text-(--ui-text)">
+          <h2 className="text-lg font-semibold tracking-tight text-(--ui-text)">
             {t("common:inputPanel.heading")}
           </h2>
         </div>
