@@ -139,6 +139,11 @@
     "skills": {
       "label": "Skills",
       "placeholder": "Add a skill...",
+      "reorderHint": "Drag a handle to reorder, or focus it and use the arrow keys.",
+      "cancelled": "Skill reordering cancelled.",
+      "reorder": "Reorder {{skill}}",
+      "remove": "Remove {{skill}}",
+      "moved": "{{skill}} moved to position {{position}} of {{count}}.",
       "add": "Add"
     }
   },

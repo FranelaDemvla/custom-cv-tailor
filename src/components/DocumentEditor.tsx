@@ -126,7 +126,7 @@ export default function DocumentEditor({
               <ResumeContactEditor data={document.data} onChange={updateData} />
               <ResumeSummaryEditor data={document.data} onChange={updateData} />
               <ResumeExperienceEditor data={document.data} onChange={updateData} />
-              <ResumeSkillsEditor data={document.data} onChange={updateData} />
+              <ResumeSkillsEditor key={document.id} data={document.data} onChange={updateData} />
               <ResumeEducationEditor data={document.data} onChange={updateData} />
             </div>
           </div>

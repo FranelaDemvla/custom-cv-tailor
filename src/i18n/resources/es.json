@@ -139,6 +139,11 @@
     "skills": {
       "label": "Habilidades",
       "placeholder": "Añadir habilidad...",
+      "reorderHint": "Arrastra un control para reordenar, o selecciónalo con el tabulador y usa las flechas.",
+      "cancelled": "Reordenación de habilidades cancelada.",
+      "reorder": "Reordenar {{skill}}",
+      "remove": "Eliminar {{skill}}",
+      "moved": "{{skill}} se movió a la posición {{position}} de {{count}}.",
       "add": "Añadir"
     }
   },
