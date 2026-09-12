@@ -237,7 +237,12 @@ export default function App() {
     setExportError(null);
     await flushPendingDocuments();
     try {
-      await generatePDF(activeDocument.data, activeDocument.style, activeDocument.outputLanguage);
+      await generatePDF(
+        activeDocument.data,
+        activeDocument.style,
+        activeDocument.outputLanguage,
+        activeDocument.title,
+      );
       updateDocument(activeDocument.id, (document) => ({
         ...document,
         lastExportedAt: new Date().toISOString(),
