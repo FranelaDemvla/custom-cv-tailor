@@ -49,7 +49,7 @@ export default function DocumentEditor({
   const updateStyle = (style: ResumeStyleOptions) => onUpdate((current) => ({ ...current, style }));
 
   return (
-    <div className="min-h-0 flex-1 overflow-y-auto bg-(--ui-workspace)">
+    <div className="min-h-0 flex-1 overflow-y-auto bg-(--ui-workspace) lg:overscroll-y-contain">
       <div className="border-b border-(--ui-border) bg-(--ui-panel) px-4 sm:px-6">
         <nav className="flex gap-5" aria-label={t("workspace:document.navigation")}>
           {TABS.map(({ id, icon: Icon, key }) => (

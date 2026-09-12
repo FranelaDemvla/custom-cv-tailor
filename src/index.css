@@ -70,6 +70,15 @@ body,
   min-height: 100%;
 }
 
+@media (min-width: 64rem) {
+  html,
+  body,
+  #root {
+    height: 100%;
+    overflow: hidden;
+  }
+}
+
 body {
   margin: 0;
   background: var(--ui-workspace);

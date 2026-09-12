@@ -341,7 +341,7 @@ export default function App() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-(--ui-workspace)">
+    <div className="flex min-h-dvh flex-col bg-(--ui-workspace) lg:h-dvh lg:overflow-hidden">
       <Header
         themePreference={themePreference}
         onThemeChange={setThemePreference}
@@ -356,7 +356,7 @@ export default function App() {
           {saveStates[document.id] === "error" && <button className="ui-secondary-button" onClick={() => { void runAction(flushPendingDocuments); }}>{t("workspace:save.retry")}</button>}
         </div>
       ))}
-      <div className="flex min-h-0 flex-1">
+      <div className="flex min-h-0 flex-1 lg:overflow-hidden">
         <div className="hidden w-65 shrink-0 border-r border-(--ui-border) lg:block">
           <WorkspaceSidebar
             documents={documents}
@@ -386,7 +386,7 @@ export default function App() {
           </div>
         )}
 
-        <main className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <main className="flex min-h-0 min-w-0 flex-1 flex-col lg:overflow-hidden">
           {activeDocument ? (
             <>
               <div className="flex items-center gap-2 border-b border-(--ui-border) bg-(--ui-panel) px-4 py-2 lg:hidden">
@@ -424,8 +424,8 @@ export default function App() {
                   </button>
                 </div>
               </div>
-              <div className="grid min-h-0 flex-1 xl:grid-cols-[minmax(420px,0.88fr)_minmax(420px,1.12fr)]">
-                <div className={mobilePane === "editor" ? "block min-h-0 xl:block" : "hidden xl:block"}>
+              <div className="grid min-h-0 flex-1 lg:overflow-hidden xl:grid-cols-[minmax(420px,0.88fr)_minmax(420px,1.12fr)]">
+                <div className={mobilePane === "editor" ? "flex min-h-0 flex-col" : "hidden min-h-0 xl:flex xl:flex-col"}>
                   <DocumentEditor
                     document={activeDocument}
                     activeTab={currentTab}
@@ -440,7 +440,7 @@ export default function App() {
                     generationError={generationErrors[activeDocument.id] || exportError}
                   />
                 </div>
-                <section className={mobilePane === "preview" ? "block min-h-0 border-l border-(--ui-border) bg-(--ui-workspace) p-4 xl:block xl:overflow-y-auto xl:p-6" : "hidden xl:block min-h-0 border-l border-(--ui-border) bg-(--ui-workspace) p-4 xl:overflow-y-auto xl:p-6"}>
+                <section className={mobilePane === "preview" ? "block min-h-0 border-l border-(--ui-border) bg-(--ui-workspace) p-4 lg:overflow-y-auto lg:overscroll-y-contain xl:p-6" : "hidden min-h-0 border-l border-(--ui-border) bg-(--ui-workspace) p-4 xl:block xl:overflow-y-auto xl:overscroll-y-contain xl:p-6"}>
                   <div className="mx-auto max-w-2xl">
                     <div className="mb-3 flex items-center justify-between gap-3">
                       <h2 className="text-sm font-semibold text-(--ui-text)">{t("common:preview.heading")}</h2>
