@@ -14,6 +14,7 @@ import {
   listDocuments,
   putDocument,
   getDocument,
+  importDocuments,
 } from "../services/documentRepository";
 
 import { DocumentSaveQueue, type SaveState } from "../lib/documentSaveQueue";
@@ -27,10 +28,19 @@ export function useDocuments() {
   const [documents, setDocuments] = useState<CVDocument[]>([]);
   const [saveStates, setSaveStates] = useState<Record<string, SaveState>>({});
   const [isReady, setIsReady] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [loadAttempt, setLoadAttempt] = useState(0);
+  const retryLoad = useCallback(() => {
+    setLoadError(false);
+    setLoadAttempt((attempt) => attempt + 1);
+  }, []);
   const documentsRef = useRef<CVDocument[]>([]);
-  const [queue] = useState(() => new DocumentSaveQueue<CVDocument>(putDocument, (id, state) => {
-    setSaveStates((states) => ({ ...states, [id]: state }));
-  }));
+  const [queue] = useState(
+    () =>
+      new DocumentSaveQueue<CVDocument>(putDocument, (id, state) => {
+        setSaveStates((states) => ({ ...states, [id]: state }));
+      }),
+  );
   const timersRef = useRef(new Map<string, number>());
   const publish = useCallback((next: CVDocument[]) => {
     documentsRef.current = sortDocuments(next);
@@ -50,12 +60,12 @@ export function useDocuments() {
         setIsReady(true);
       })
       .catch(() => {
-        if (!cancelled) setIsReady(true);
+        if (!cancelled) setLoadError(true);
       });
     return () => {
       cancelled = true;
     };
-  }, [publish, queue]);
+  }, [publish, queue, loadAttempt]);
 
   const queueSave = useCallback(
     (document: CVDocument) => {
@@ -106,6 +116,22 @@ export function useDocuments() {
     [publish, queue],
   );
 
+  const importIntoLibrary = useCallback(
+    async (candidates: CVDocument[]) => {
+      const imported = await importDocuments(candidates);
+      imported.forEach((document) => queue.seed(document));
+      publish([...documentsRef.current, ...imported]);
+      setSaveStates((states) => ({
+        ...states,
+        ...Object.fromEntries(
+          imported.map((document) => [document.id, "saved"]),
+        ),
+      }));
+      return imported;
+    },
+    [publish, queue],
+  );
+
   const duplicateDocument = useCallback(
     async (source: CVDocument) => {
       const now = new Date().toISOString();
@@ -125,12 +151,15 @@ export function useDocuments() {
     [createDocument],
   );
 
-  const restoreDocument = useCallback(async (document: CVDocument) => {
-    await putDocument(document, null);
-    queue.seed(document);
-    publish([...documentsRef.current, document]);
-    setSaveStates((states) => ({ ...states, [document.id]: "saved" }));
-  }, [publish, queue]);
+  const restoreDocument = useCallback(
+    async (document: CVDocument) => {
+      await putDocument(document, null);
+      queue.seed(document);
+      publish([...documentsRef.current, document]);
+      setSaveStates((states) => ({ ...states, [document.id]: "saved" }));
+    },
+    [publish, queue],
+  );
 
   const flushPendingDocuments = useCallback(async () => {
     for (const timer of timersRef.current.values()) window.clearTimeout(timer);
@@ -138,30 +167,55 @@ export function useDocuments() {
     await queue.flushAll();
   }, [queue]);
 
-  const reloadDocument = useCallback(async (id: string) => {
-    const timer = timersRef.current.get(id);
-    if (timer) window.clearTimeout(timer);
-    timersRef.current.delete(id);
-    // Read before discarding so a failed read preserves the local edits.
-    const stored = await getDocument(id);
-    await queue.discard(id);
-    if (stored) queue.seed(stored);
-    publish([...documentsRef.current.filter((item) => item.id !== id), ...(stored ? [stored] : [])]);
-    setSaveStates((states) => ({ ...states, [id]: "saved" }));
-    return stored;
-  }, [publish, queue]);
+  useEffect(() => {
+    const flushWhenHidden = () => {
+      if (document.visibilityState === "hidden")
+        void flushPendingDocuments().catch(() => undefined);
+    };
+    const flushOnPageHide = () => {
+      void flushPendingDocuments().catch(() => undefined);
+    };
+    document.addEventListener("visibilitychange", flushWhenHidden);
+    window.addEventListener("pagehide", flushOnPageHide);
+    return () => {
+      document.removeEventListener("visibilitychange", flushWhenHidden);
+      window.removeEventListener("pagehide", flushOnPageHide);
+    };
+  }, [flushPendingDocuments]);
 
-  const removeDocument = useCallback(async (document: CVDocument) => {
-    await flushPendingDocuments();
-    await deleteDocument(document.id);
-    await queue.discard(document.id);
-    publish(documentsRef.current.filter((item) => item.id !== document.id));
-    setSaveStates((states) => {
-      const next = { ...states };
-      delete next[document.id];
-      return next;
-    });
-  }, [flushPendingDocuments, publish, queue]);
+  const reloadDocument = useCallback(
+    async (id: string) => {
+      const timer = timersRef.current.get(id);
+      if (timer) window.clearTimeout(timer);
+      timersRef.current.delete(id);
+      // Read before discarding so a failed read preserves the local edits.
+      const stored = await getDocument(id);
+      await queue.discard(id);
+      if (stored) queue.seed(stored);
+      publish([
+        ...documentsRef.current.filter((item) => item.id !== id),
+        ...(stored ? [stored] : []),
+      ]);
+      setSaveStates((states) => ({ ...states, [id]: "saved" }));
+      return stored;
+    },
+    [publish, queue],
+  );
+
+  const removeDocument = useCallback(
+    async (document: CVDocument) => {
+      await flushPendingDocuments();
+      await deleteDocument(document.id);
+      await queue.discard(document.id);
+      publish(documentsRef.current.filter((item) => item.id !== document.id));
+      setSaveStates((states) => {
+        const next = { ...states };
+        delete next[document.id];
+        return next;
+      });
+    },
+    [flushPendingDocuments, publish, queue],
+  );
 
   useEffect(() => {
     const timers = timersRef.current;
@@ -175,9 +229,12 @@ export function useDocuments() {
     hasPendingWrites: () => queue.hasPending(),
     reloadDocument,
     isReady,
+    loadError,
+    retryLoad,
     saveStates,
     updateDocument,
     createDocument,
+    importIntoLibrary,
     duplicateDocument,
     removeDocument,
     restoreDocument,

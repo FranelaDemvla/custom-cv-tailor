@@ -237,7 +237,8 @@
       "conflict": "Este CV cambió en otra pestaña. Tus cambios se conservan aquí.",
       "asCopy": "Guardar mis cambios como copia",
       "reload": "Descartar mis cambios y cargar la versión guardada",
-      "retry": "Reintentar guardar"
+      "retry": "Reintentar guardar",
+      "loadFailed": "No se pudo abrir tu biblioteca de CVs. Reintenta para acceder a tus documentos guardados."
     },
     "settings": {
       "title": "Ajustes de generación",
@@ -271,6 +272,12 @@
     "backup": {
       "importFailed": "No se pudo importar esta copia.",
       "deleted": "CV eliminado."
+    },
+    "offline": {
+      "ready": "Listo para usar sin conexión. Los CVs se guardan en este dispositivo.",
+      "preparing": "Preparando el acceso sin conexión...",
+      "unavailable": "No se puede volver a abrir sin conexión. Los cambios se guardan en este dispositivo.",
+      "disconnected": "Estás sin conexión. Puedes seguir editando y guardando en este dispositivo. La generación con IA necesita un proveedor accesible."
     }
   }
 }

@@ -1,32 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, FileText, Loader2 } from "lucide-react";
 import type { OutputLanguage, ResumeData, ResumeStyleOptions } from "../types";
-import { generatePDFBlob } from "../services/pdfService";
+import type { PDFDocumentLoadingTask, RenderTask } from "pdfjs-dist";
 import { useTranslation } from "react-i18next";
-
-interface PdfDocumentProxy {
-  numPages: number;
-  getPage: (pageNumber: number) => Promise<PdfPageProxy>;
-  destroy?: () => Promise<void>;
-}
-
-interface PdfPageProxy {
-  getViewport: (options: { scale: number }) => { width: number; height: number };
-  render: (options: {
-    canvasContext: CanvasRenderingContext2D;
-    viewport: { width: number; height: number };
-  }) => PdfRenderTask;
-}
-
-interface PdfRenderTask {
-  promise: Promise<void>;
-  cancel?: () => void;
-}
-
-interface PdfJsLib {
-  GlobalWorkerOptions: { workerSrc: string };
-  getDocument: (options: { data: Uint8Array }) => { promise: Promise<PdfDocumentProxy> };
-}
 
 export default function VisualPreview({
   data,
@@ -62,7 +38,10 @@ export default function VisualPreview({
     const timer = window.setTimeout(() => {
       setIsRendering(true);
       setError(null);
-      generatePDFBlob(data, layout, outputLanguage)
+      import("../services/pdfService")
+        .then(({ generatePDFBlob }) =>
+          generatePDFBlob(data, layout, outputLanguage),
+        )
         .then(async (blob) => {
           const bytes = new Uint8Array(await blob.arrayBuffer());
           if (!current) return;
@@ -71,7 +50,11 @@ export default function VisualPreview({
         })
         .catch((reason: unknown) => {
           if (!current) return;
-          setError(reason instanceof Error ? reason.message : t("common:errors.pdfFailed"));
+          setError(
+            reason instanceof Error
+              ? reason.message
+              : t("common:errors.pdfFailed"),
+          );
           setIsRendering(false);
         });
     }, 280);
@@ -85,19 +68,19 @@ export default function VisualPreview({
   useEffect(() => {
     if (!pdfBytes || !canvasRef.current || !containerWidth) return;
     let current = true;
-    let renderTask: PdfRenderTask | undefined;
-    let documentProxy: PdfDocumentProxy | undefined;
+    let renderTask: RenderTask | undefined;
+    let loadingTask: PDFDocumentLoadingTask | undefined;
     setIsRendering(true);
     import("pdfjs-dist")
-      .then(async (module) => {
-        const pdfjsLib = module as unknown as PdfJsLib;
+      .then(async (pdfjsLib) => {
         pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
           "pdfjs-dist/build/pdf.worker.min.mjs",
           import.meta.url,
         ).toString();
         // pdf.js transfers the provided buffer to its worker. Keep the state-owned
         // bytes reusable when ResizeObserver or pagination causes another render.
-        documentProxy = await pdfjsLib.getDocument({ data: pdfBytes.slice() }).promise;
+        loadingTask = pdfjsLib.getDocument({ data: pdfBytes.slice() });
+        const documentProxy = await loadingTask.promise;
         if (!current) return;
         setPageCount(documentProxy.numPages);
         const safePage = Math.min(pageNumber, documentProxy.numPages);
@@ -112,7 +95,7 @@ export default function VisualPreview({
         canvas.height = viewport.height;
         const context = canvas.getContext("2d");
         if (!context) throw new Error("Canvas preview is unavailable.");
-        renderTask = page.render({ canvasContext: context, viewport });
+        renderTask = page.render({ canvas, canvasContext: context, viewport });
         await renderTask.promise;
         if (current) {
           setError(null);
@@ -121,11 +104,15 @@ export default function VisualPreview({
       })
       .catch((reason: unknown) => {
         if (!current) return;
-        setError(reason instanceof Error ? reason.message : t("common:errors.pdfFailed"));
+        setError(
+          reason instanceof Error
+            ? reason.message
+            : t("common:errors.pdfFailed"),
+        );
         setIsRendering(false);
       })
       .finally(() => {
-        void documentProxy?.destroy?.();
+        void loadingTask?.destroy().catch(() => undefined);
       });
 
     return () => {
@@ -146,7 +133,9 @@ export default function VisualPreview({
         ) : (
           <div className="flex min-h-125 flex-col items-center justify-center gap-3 text-(--ui-muted)">
             <FileText className="h-10 w-10 opacity-40" />
-            <span className="text-sm">{error || t("workspace:preview.preparing")}</span>
+            <span className="text-sm">
+              {error || t("workspace:preview.preparing")}
+            </span>
           </div>
         )}
         {isRendering && pdfBytes && (
@@ -156,7 +145,10 @@ export default function VisualPreview({
           </div>
         )}
         {error && pdfBytes && (
-          <div className="absolute inset-x-3 bottom-3 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700 shadow-sm" role="alert">
+          <div
+            className="absolute inset-x-3 bottom-3 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700 shadow-sm"
+            role="alert"
+          >
             {error}
           </div>
         )}
@@ -171,7 +163,12 @@ export default function VisualPreview({
         >
           <ChevronLeft className="h-4 w-4" />
         </button>
-        <span>{t("workspace:preview.page", { current: pageNumber, total: pageCount })}</span>
+        <span>
+          {t("workspace:preview.page", {
+            current: pageNumber,
+            total: pageCount,
+          })}
+        </span>
         <button
           type="button"
           onClick={() => setPageNumber((page) => Math.min(pageCount, page + 1))}

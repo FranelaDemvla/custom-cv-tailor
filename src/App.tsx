@@ -11,13 +11,9 @@ import VisualPreview from "./components/VisualPreview";
 import { selectionAfterGeneration } from "./lib/documentSaveQueue";
 import { useDocuments } from "./hooks/useDocuments";
 import { useTheme } from "./hooks/useTheme";
+import { useOfflineStatus } from "./hooks/useOfflineStatus";
 import { generateResume, LLMServiceError } from "./services/llmService";
-import {
-  importDocuments,
-  makeBackup,
-  parseBackup,
-} from "./services/documentRepository";
-import { generatePDF } from "./services/pdfService";
+import { makeBackup, parseBackup } from "./services/documentRepository";
 import {
   createEmptyDocument,
   createId,
@@ -25,7 +21,10 @@ import {
   type ProviderCredentials,
   type ProviderSettings,
 } from "./types";
-import { readPreferences, savePreferences } from "./services/preferencesRepository";
+import {
+  readPreferences,
+  savePreferences,
+} from "./services/preferencesRepository";
 
 function initialProvider(): ProviderSettings {
   return {
@@ -43,14 +42,19 @@ function copyValue<T>(value: T): T {
 export default function App() {
   const { t } = useTranslation();
   const uiLanguage = i18next.language.slice(0, 2) === "es" ? "es" : "en";
-  const { preference: themePreference, setPreference: setThemePreference } = useTheme();
+  const { preference: themePreference, setPreference: setThemePreference } =
+    useTheme();
+  const offline = useOfflineStatus();
   const defaults = useMemo(() => readPreferences(initialProvider()), []);
   const {
     documents,
     isReady,
+    loadError,
+    retryLoad,
     saveStates,
     updateDocument,
     createDocument,
+    importIntoLibrary,
     duplicateDocument,
     removeDocument,
     restoreDocument,
@@ -59,7 +63,9 @@ export default function App() {
     reloadDocument,
   } = useDocuments();
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [defaultProvider, setDefaultProvider] = useState<ProviderSettings>(defaults.defaultProvider);
+  const [defaultProvider, setDefaultProvider] = useState<ProviderSettings>(
+    defaults.defaultProvider,
+  );
   const [credentials, setCredentials] = useState<ProviderCredentials>({
     openai: "",
     local: "",
@@ -68,9 +74,16 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mobilePane, setMobilePane] = useState<"editor" | "preview">("editor");
   const [activeTabs, setActiveTabs] = useState<Record<string, EditorTab>>({});
-  const [generation, setGeneration] = useState<{ documentId: string; requestId: string } | null>(null);
-  const [generationErrors, setGenerationErrors] = useState<Record<string, string>>({});
-  const [deletedDocument, setDeletedDocument] = useState<CVDocument | null>(null);
+  const [generation, setGeneration] = useState<{
+    documentId: string;
+    requestId: string;
+  } | null>(null);
+  const [generationErrors, setGenerationErrors] = useState<
+    Record<string, string>
+  >({});
+  const [deletedDocument, setDeletedDocument] = useState<CVDocument | null>(
+    null,
+  );
   const [exportError, setExportError] = useState<string | null>(null);
   const documentsRef = useRef(documents);
   const abortRef = useRef<AbortController | null>(null);
@@ -81,9 +94,11 @@ export default function App() {
 
   useEffect(() => {
     if (!isReady || activeId) return;
-    const preferred = defaults.lastActiveId && documents.some((document) => document.id === defaults.lastActiveId)
-      ? defaults.lastActiveId
-      : documents[0]?.id || null;
+    const preferred =
+      defaults.lastActiveId &&
+      documents.some((document) => document.id === defaults.lastActiveId)
+        ? defaults.lastActiveId
+        : documents[0]?.id || null;
     setActiveId(preferred);
   }, [activeId, defaults.lastActiveId, documents, isReady]);
 
@@ -109,24 +124,38 @@ export default function App() {
     return () => window.removeEventListener("beforeunload", warnBeforeLeave);
   }, [hasPendingWrites]);
 
-  const activeDocument = documents.find((document) => document.id === activeId) || null;
+  const activeDocument =
+    documents.find((document) => document.id === activeId) || null;
   const activeProvider = activeDocument?.provider || defaultProvider;
   const currentTab = activeDocument
-    ? activeTabs[activeDocument.id] || (activeDocument.contentStatus === "generated" ? "content" : "source")
+    ? activeTabs[activeDocument.id] ||
+      (activeDocument.contentStatus === "generated" ? "content" : "source")
     : "source";
   const currentGeneration = generation?.documentId === activeDocument?.id;
-  const providerKey = activeProvider.provider === "openai" ? credentials.openai : credentials.local;
-  const providerConfigured = Boolean(activeProvider.model.trim() && (
-    activeProvider.provider === "openai" ? providerKey.trim() : activeProvider.baseUrl.trim()
-  ));
-  const providerLabel = activeProvider.provider === "openai"
-    ? "OpenAI · " + (activeProvider.model || t("workspace:settings.noModel"))
-    : t("workspace:settings.local") + " · " + (activeProvider.model || t("workspace:settings.noModel"));
+  const providerKey =
+    activeProvider.provider === "openai"
+      ? credentials.openai
+      : credentials.local;
+  const providerConfigured = Boolean(
+    activeProvider.model.trim() &&
+    (activeProvider.provider === "openai"
+      ? providerKey.trim()
+      : activeProvider.baseUrl.trim()),
+  );
+  const providerLabel =
+    activeProvider.provider === "openai"
+      ? "OpenAI · " + (activeProvider.model || t("workspace:settings.noModel"))
+      : t("workspace:settings.local") +
+        " · " +
+        (activeProvider.model || t("workspace:settings.noModel"));
 
-  const setTab = useCallback((tab: EditorTab) => {
-    if (!activeId) return;
-    setActiveTabs((tabs) => ({ ...tabs, [activeId]: tab }));
-  }, [activeId]);
+  const setTab = useCallback(
+    (tab: EditorTab) => {
+      if (!activeId) return;
+      setActiveTabs((tabs) => ({ ...tabs, [activeId]: tab }));
+    },
+    [activeId],
+  );
 
   const handleCreate = useCallback(async () => {
     await flushPendingDocuments();
@@ -141,17 +170,23 @@ export default function App() {
     setSidebarOpen(false);
   }, [createDocument, defaultProvider, flushPendingDocuments, uiLanguage]);
 
-  const handleSelect = useCallback(async (id: string) => {
-    await flushPendingDocuments().catch(() => undefined);
-    setActiveId(id);
-    setMobilePane("editor");
-    setSidebarOpen(false);
-  }, [flushPendingDocuments]);
+  const handleSelect = useCallback(
+    async (id: string) => {
+      await flushPendingDocuments().catch(() => undefined);
+      setActiveId(id);
+      setMobilePane("editor");
+      setSidebarOpen(false);
+    },
+    [flushPendingDocuments],
+  );
 
-  const handleUpdate = useCallback((update: (document: CVDocument) => CVDocument) => {
-    if (!activeDocument) return;
-    updateDocument(activeDocument.id, update);
-  }, [activeDocument, updateDocument]);
+  const handleUpdate = useCallback(
+    (update: (document: CVDocument) => CVDocument) => {
+      if (!activeDocument) return;
+      updateDocument(activeDocument.id, update);
+    },
+    [activeDocument, updateDocument],
+  );
 
   const handleGenerate = useCallback(async () => {
     const document = documentsRef.current.find((item) => item.id === activeId);
@@ -180,7 +215,9 @@ export default function App() {
         snapshot.outputLanguage,
         controller.signal,
       );
-      const current = documentsRef.current.find((item) => item.id === snapshot.id);
+      const current = documentsRef.current.find(
+        (item) => item.id === snapshot.id,
+      );
       if (!current) return;
       if (current.revision !== snapshot.revision) {
         const now = new Date().toISOString();
@@ -195,7 +232,9 @@ export default function App() {
           contentStatus: "generated",
         };
         const created = await createDocument(generatedCopy);
-        setActiveId((selected) => selectionAfterGeneration(selected, snapshot.id, created.id));
+        setActiveId((selected) =>
+          selectionAfterGeneration(selected, snapshot.id, created.id),
+        );
         setActiveTabs((tabs) => ({ ...tabs, [created.id]: "content" }));
       } else {
         updateDocument(snapshot.id, (currentDocument) => ({
@@ -211,7 +250,8 @@ export default function App() {
       }
       setGenerationErrors((errors) => ({
         ...errors,
-        [snapshot.id]: error instanceof Error ? error.message : t("common:errors.generic"),
+        [snapshot.id]:
+          error instanceof Error ? error.message : t("common:errors.generic"),
       }));
     } finally {
       if (abortRef.current === controller) {
@@ -219,7 +259,15 @@ export default function App() {
         abortRef.current = null;
       }
     }
-  }, [activeId, credentials, generation, providerConfigured, t, updateDocument, createDocument]);
+  }, [
+    activeId,
+    credentials,
+    generation,
+    providerConfigured,
+    t,
+    updateDocument,
+    createDocument,
+  ]);
 
   const handleCancelGeneration = useCallback(() => {
     if (!generation) return;
@@ -237,6 +285,7 @@ export default function App() {
     setExportError(null);
     await flushPendingDocuments();
     try {
+      const { generatePDF } = await import("./services/pdfService");
       await generatePDF(
         activeDocument.data,
         activeDocument.style,
@@ -248,7 +297,9 @@ export default function App() {
         lastExportedAt: new Date().toISOString(),
       }));
     } catch (error) {
-      setExportError(error instanceof Error ? error.message : t("common:errors.pdfFailed"));
+      setExportError(
+        error instanceof Error ? error.message : t("common:errors.pdfFailed"),
+      );
     }
   }, [activeDocument, flushPendingDocuments, t, updateDocument]);
 
@@ -260,7 +311,9 @@ export default function App() {
       abortRef.current = null;
     }
     const deleted = activeDocument;
-    const remaining = documents.filter((document) => document.id !== deleted.id);
+    const remaining = documents.filter(
+      (document) => document.id !== deleted.id,
+    );
     await removeDocument(deleted);
     setDeletedDocument(deleted);
     setActiveId(remaining[0]?.id || null);
@@ -296,37 +349,55 @@ export default function App() {
     URL.revokeObjectURL(url);
   }, [documents]);
 
-  const handleImportBackup = useCallback(async (file: File) => {
-    try {
-      const parsed: unknown = JSON.parse(await file.text());
-      const candidates = parseBackup(parsed);
-      const imported = await importDocuments(candidates);
-      const first = imported[0];
-      if (first) {
-        setActiveId(first.id);
-        savePreferences({ lastActiveId: first.id }, defaults);
+  const handleImportBackup = useCallback(
+    async (file: File) => {
+      try {
+        const parsed: unknown = JSON.parse(await file.text());
+        const candidates = parseBackup(parsed);
+        await flushPendingDocuments();
+        const imported = await importIntoLibrary(candidates);
+        const first = imported[0];
+        if (first) {
+          setActiveId(first.id);
+          savePreferences({ lastActiveId: first.id }, defaults);
+        }
+      } catch (error) {
+        setExportError(
+          error instanceof Error
+            ? error.message
+            : t("workspace:backup.importFailed"),
+        );
       }
-      window.location.reload();
-    } catch (error) {
-      setExportError(error instanceof Error ? error.message : t("workspace:backup.importFailed"));
-    }
-  }, [defaults, t]);
+    },
+    [defaults, flushPendingDocuments, importIntoLibrary, t],
+  );
 
-  const handleProviderSave = useCallback((settings: ProviderSettings, nextCredentials: ProviderCredentials) => {
-    setCredentials(nextCredentials);
-    setDefaultProvider(settings);
-    if (activeDocument) {
-      updateDocument(activeDocument.id, (document) => ({ ...document, provider: settings }));
-    }
-    setSettingsOpen(false);
-  }, [activeDocument, updateDocument]);
+  const handleProviderSave = useCallback(
+    (settings: ProviderSettings, nextCredentials: ProviderCredentials) => {
+      setCredentials(nextCredentials);
+      setDefaultProvider(settings);
+      if (activeDocument) {
+        updateDocument(activeDocument.id, (document) => ({
+          ...document,
+          provider: settings,
+        }));
+      }
+      setSettingsOpen(false);
+    },
+    [activeDocument, updateDocument],
+  );
 
   const [recoveryBusy, setRecoveryBusy] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const runAction = async (action: () => Promise<unknown>) => {
     setActionError(null);
-    try { await action(); }
-    catch (error) { setActionError(error instanceof Error ? error.message : t("common:errors.generic")); }
+    try {
+      await action();
+    } catch (error) {
+      setActionError(
+        error instanceof Error ? error.message : t("common:errors.generic"),
+      );
+    }
   };
   const recover = async (id: string, asCopy: boolean) => {
     setRecoveryBusy(true);
@@ -337,12 +408,28 @@ export default function App() {
         setActiveId(copy.id);
       }
       const stored = await reloadDocument(id);
-      if (!stored) setActiveId((selected) => selected === id ? null : selected);
-    } finally { setRecoveryBusy(false); }
+      if (!stored)
+        setActiveId((selected) => (selected === id ? null : selected));
+    } finally {
+      setRecoveryBusy(false);
+    }
   };
 
   if (!isReady) {
-    return <div className="flex min-h-screen items-center justify-center bg-(--ui-workspace) text-sm text-(--ui-muted)">{t("workspace:loading")}</div>;
+    if (loadError)
+      return (
+        <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-(--ui-workspace) p-6 text-(--ui-text)">
+          <p role="alert">{t("workspace:save.loadFailed")}</p>
+          <button className="ui-secondary-button" onClick={retryLoad}>
+            {t("workspace:save.retry")}
+          </button>
+        </div>
+      );
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-(--ui-workspace) text-sm text-(--ui-muted)">
+        {t("workspace:loading")}
+      </div>
+    );
   }
 
   return (
@@ -352,23 +439,88 @@ export default function App() {
         onThemeChange={setThemePreference}
         onOpenSettings={() => setSettingsOpen(true)}
       />
-      {actionError && <p role="alert" className="px-4 py-2 text-sm text-red-600">{actionError}</p>}
-      {documents.filter((document) => saveStates[document.id] === "conflict" || saveStates[document.id] === "error").map((document) => (
-        <div key={document.id} role="alert" className="flex flex-wrap items-center gap-3 border-b border-(--ui-border) bg-(--ui-panel) px-4 py-3 text-sm text-(--ui-text)">
-          <span>{document.title}: {t(saveStates[document.id] === "conflict" ? "workspace:save.conflict" : "workspace:save.failed")}</span>
-          <button disabled={recoveryBusy} className="ui-secondary-button" onClick={() => { void runAction(() => recover(document.id, true)); }}>{t("workspace:save.asCopy")}</button>
-          <button disabled={recoveryBusy} className="ui-secondary-button" onClick={() => { void runAction(() => recover(document.id, false)); }}>{t("workspace:save.reload")}</button>
-          {saveStates[document.id] === "error" && <button className="ui-secondary-button" onClick={() => { void runAction(flushPendingDocuments); }}>{t("workspace:save.retry")}</button>}
-        </div>
-      ))}
+      <div
+        role="status"
+        className="flex flex-wrap items-center gap-3 border-b border-(--ui-border) bg-(--ui-panel) px-4 py-2 text-xs text-(--ui-muted)"
+      >
+        <span>
+          {!offline.online
+            ? t("workspace:offline.disconnected")
+            : t(`workspace:offline.${offline.cacheState}`)}
+        </span>
+        {offline.cacheState === "unavailable" && import.meta.env.PROD && (
+          <button className="ui-quiet-button" onClick={offline.retry}>
+            {t("workspace:save.retry")}
+          </button>
+        )}
+      </div>
+      {actionError && (
+        <p role="alert" className="px-4 py-2 text-sm text-red-600">
+          {actionError}
+        </p>
+      )}
+      {documents
+        .filter(
+          (document) =>
+            saveStates[document.id] === "conflict" ||
+            saveStates[document.id] === "error",
+        )
+        .map((document) => (
+          <div
+            key={document.id}
+            role="alert"
+            className="flex flex-wrap items-center gap-3 border-b border-(--ui-border) bg-(--ui-panel) px-4 py-3 text-sm text-(--ui-text)"
+          >
+            <span>
+              {document.title}:{" "}
+              {t(
+                saveStates[document.id] === "conflict"
+                  ? "workspace:save.conflict"
+                  : "workspace:save.failed",
+              )}
+            </span>
+            <button
+              disabled={recoveryBusy}
+              className="ui-secondary-button"
+              onClick={() => {
+                void runAction(() => recover(document.id, true));
+              }}
+            >
+              {t("workspace:save.asCopy")}
+            </button>
+            <button
+              disabled={recoveryBusy}
+              className="ui-secondary-button"
+              onClick={() => {
+                void runAction(() => recover(document.id, false));
+              }}
+            >
+              {t("workspace:save.reload")}
+            </button>
+            {saveStates[document.id] === "error" && (
+              <button
+                className="ui-secondary-button"
+                onClick={() => {
+                  void runAction(flushPendingDocuments);
+                }}
+              >
+                {t("workspace:save.retry")}
+              </button>
+            )}
+          </div>
+        ))}
       <div className="flex min-h-0 flex-1 lg:overflow-hidden">
         <div className="hidden w-65 shrink-0 border-r border-(--ui-border) lg:block">
           <WorkspaceSidebar
             documents={documents}
             activeId={activeId}
             generatingId={generation?.documentId || null}
-            onSelect={(id) => { void runAction(() => handleSelect(id)); }}
-            onCreate={() => { void runAction(handleCreate); }}
+            onSelect={(id) => {
+              void runAction(() => handleSelect(id));
+            }}
+            onCreate={() => {
+              void runAction(handleCreate);
+            }}
             onExportBackup={handleExportBackup}
             onImportBackup={handleImportBackup}
           />
@@ -376,14 +528,22 @@ export default function App() {
 
         {sidebarOpen && (
           <div className="fixed inset-0 z-40 lg:hidden">
-            <button className="absolute inset-0 bg-slate-950/40" onClick={() => setSidebarOpen(false)} aria-label={t("workspace:actions.close")} />
+            <button
+              className="absolute inset-0 bg-slate-950/40"
+              onClick={() => setSidebarOpen(false)}
+              aria-label={t("workspace:actions.close")}
+            />
             <div className="relative h-full w-[min(86vw,320px)] shadow-2xl">
               <WorkspaceSidebar
                 documents={documents}
                 activeId={activeId}
                 generatingId={generation?.documentId || null}
-                onSelect={(id) => { void runAction(() => handleSelect(id)); }}
-                onCreate={() => { void runAction(handleCreate); }}
+                onSelect={(id) => {
+                  void runAction(() => handleSelect(id));
+                }}
+                onCreate={() => {
+                  void runAction(handleCreate);
+                }}
                 onExportBackup={handleExportBackup}
                 onImportBackup={handleImportBackup}
               />
@@ -395,20 +555,35 @@ export default function App() {
           {activeDocument ? (
             <>
               <div className="flex items-center gap-2 border-b border-(--ui-border) bg-(--ui-panel) px-4 py-2 lg:hidden">
-                <button type="button" onClick={() => setSidebarOpen(true)} className="ui-icon-button" aria-label={t("workspace:actions.openLibrary")}>
+                <button
+                  type="button"
+                  onClick={() => setSidebarOpen(true)}
+                  className="ui-icon-button"
+                  aria-label={t("workspace:actions.openLibrary")}
+                >
                   <Menu className="h-4 w-4" />
                 </button>
-                <span className="truncate text-sm font-medium text-(--ui-text)">{activeDocument.title}</span>
+                <span className="truncate text-sm font-medium text-(--ui-text)">
+                  {activeDocument.title}
+                </span>
               </div>
               <DocumentToolbar
                 title={activeDocument.title}
                 provider={activeProvider}
                 saveState={saveStates[activeDocument.id] || "saved"}
                 isGenerating={currentGeneration}
-                onTitleChange={(title) => handleUpdate((document) => ({ ...document, title }))}
-                onDuplicate={() => { void runAction(handleDuplicate); }}
-                onDelete={() => { void runAction(handleDelete); }}
-                onDownload={() => { void runAction(handleDownload); }}
+                onTitleChange={(title) =>
+                  handleUpdate((document) => ({ ...document, title }))
+                }
+                onDuplicate={() => {
+                  void runAction(handleDuplicate);
+                }}
+                onDelete={() => {
+                  void runAction(handleDelete);
+                }}
+                onDownload={() => {
+                  void runAction(handleDownload);
+                }}
                 onCancelGeneration={handleCancelGeneration}
               />
               <div className="flex border-b border-(--ui-border) bg-(--ui-panel) px-4 py-2 xl:hidden">
@@ -416,39 +591,67 @@ export default function App() {
                   <button
                     type="button"
                     onClick={() => setMobilePane("editor")}
-                    className={mobilePane === "editor" ? "rounded-md bg-(--ui-panel) px-3 py-2 text-xs font-semibold text-(--ui-text) shadow-sm" : "rounded-md px-3 py-2 text-xs font-medium text-(--ui-muted)"}
+                    className={
+                      mobilePane === "editor"
+                        ? "rounded-md bg-(--ui-panel) px-3 py-2 text-xs font-semibold text-(--ui-text) shadow-sm"
+                        : "rounded-md px-3 py-2 text-xs font-medium text-(--ui-muted)"
+                    }
                   >
                     {t("workspace:preview.editor")}
                   </button>
                   <button
                     type="button"
                     onClick={() => setMobilePane("preview")}
-                    className={mobilePane === "preview" ? "rounded-md bg-(--ui-panel) px-3 py-2 text-xs font-semibold text-(--ui-text) shadow-sm" : "rounded-md px-3 py-2 text-xs font-medium text-(--ui-muted)"}
+                    className={
+                      mobilePane === "preview"
+                        ? "rounded-md bg-(--ui-panel) px-3 py-2 text-xs font-semibold text-(--ui-text) shadow-sm"
+                        : "rounded-md px-3 py-2 text-xs font-medium text-(--ui-muted)"
+                    }
                   >
                     {t("workspace:preview.preview")}
                   </button>
                 </div>
               </div>
               <div className="grid min-h-0 flex-1 lg:overflow-hidden xl:grid-cols-[minmax(420px,0.88fr)_minmax(420px,1.12fr)]">
-                <div className={mobilePane === "editor" ? "flex min-h-0 flex-col" : "hidden min-h-0 xl:flex xl:flex-col"}>
+                <div
+                  className={
+                    mobilePane === "editor"
+                      ? "flex min-h-0 flex-col"
+                      : "hidden min-h-0 xl:flex xl:flex-col"
+                  }
+                >
                   <DocumentEditor
                     document={activeDocument}
                     activeTab={currentTab}
                     onTabChange={setTab}
                     onUpdate={handleUpdate}
                     onGenerate={handleGenerate}
-                    canGenerate={Boolean(activeDocument.source.cvText.trim() && providerConfigured && !generation)}
+                    canGenerate={Boolean(
+                      activeDocument.source.cvText.trim() &&
+                      providerConfigured &&
+                      !generation,
+                    )}
                     isGenerating={currentGeneration}
                     providerConfigured={providerConfigured}
                     providerLabel={providerLabel}
                     onOpenSettings={() => setSettingsOpen(true)}
-                    generationError={generationErrors[activeDocument.id] || exportError}
+                    generationError={
+                      generationErrors[activeDocument.id] || exportError
+                    }
                   />
                 </div>
-                <section className={mobilePane === "preview" ? "block min-h-0 border-l border-(--ui-border) bg-(--ui-workspace) p-4 lg:overflow-y-auto lg:overscroll-y-contain xl:p-6" : "hidden min-h-0 border-l border-(--ui-border) bg-(--ui-workspace) p-4 xl:block xl:overflow-y-auto xl:overscroll-y-contain xl:p-6"}>
+                <section
+                  className={
+                    mobilePane === "preview"
+                      ? "block min-h-0 border-l border-(--ui-border) bg-(--ui-workspace) p-4 lg:overflow-y-auto lg:overscroll-y-contain xl:p-6"
+                      : "hidden min-h-0 border-l border-(--ui-border) bg-(--ui-workspace) p-4 xl:block xl:overflow-y-auto xl:overscroll-y-contain xl:p-6"
+                  }
+                >
                   <div className="mx-auto max-w-2xl">
                     <div className="mb-3 flex items-center justify-between gap-3">
-                      <h2 className="text-sm font-semibold text-(--ui-text)">{t("common:preview.heading")}</h2>
+                      <h2 className="text-sm font-semibold text-(--ui-text)">
+                        {t("common:preview.heading")}
+                      </h2>
                     </div>
                     <VisualPreview
                       data={activeDocument.data}
@@ -465,9 +668,19 @@ export default function App() {
                 <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-50 text-brand-700">
                   <PanelLeftOpen className="h-6 w-6" />
                 </div>
-                <h2 className="mt-6 font-serif text-3xl tracking-tight text-(--ui-text)">{t("workspace:empty.title")}</h2>
-                <p className="mt-3 text-sm leading-6 text-(--ui-muted)">{t("workspace:empty.description")}</p>
-                <button type="button" onClick={() => { void runAction(handleCreate); }} className="ui-primary-button mt-6">
+                <h2 className="mt-6 font-serif text-3xl tracking-tight text-(--ui-text)">
+                  {t("workspace:empty.title")}
+                </h2>
+                <p className="mt-3 text-sm leading-6 text-(--ui-muted)">
+                  {t("workspace:empty.description")}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    void runAction(handleCreate);
+                  }}
+                  className="ui-primary-button mt-6"
+                >
                   {t("workspace:actions.newCV")}
                 </button>
               </div>
@@ -479,8 +692,23 @@ export default function App() {
       {deletedDocument && (
         <div className="fixed bottom-4 left-1/2 z-30 flex -translate-x-1/2 items-center gap-4 rounded-lg bg-slate-900 px-4 py-3 text-sm text-white shadow-xl">
           <span>{t("workspace:backup.deleted")}</span>
-          <button type="button" onClick={() => { void runAction(handleUndoDelete); }} className="font-semibold text-blue-200 hover:text-white">{t("workspace:actions.undo")}</button>
-          <button type="button" onClick={() => setDeletedDocument(null)} className="text-slate-300 hover:text-white" aria-label={t("workspace:actions.close")}><X className="h-4 w-4" /></button>
+          <button
+            type="button"
+            onClick={() => {
+              void runAction(handleUndoDelete);
+            }}
+            className="font-semibold text-blue-200 hover:text-white"
+          >
+            {t("workspace:actions.undo")}
+          </button>
+          <button
+            type="button"
+            onClick={() => setDeletedDocument(null)}
+            className="text-slate-300 hover:text-white"
+            aria-label={t("workspace:actions.close")}
+          >
+            <X className="h-4 w-4" />
+          </button>
         </div>
       )}
 

@@ -237,7 +237,8 @@
       "conflict": "This CV changed in another tab. Your edits are kept here.",
       "asCopy": "Save my edits as a copy",
       "reload": "Discard my edits and reload saved version",
-      "retry": "Retry saving"
+      "retry": "Retry saving",
+      "loadFailed": "Your CV library could not be opened. Retry to access your saved documents."
     },
     "settings": {
       "title": "Generation settings",
@@ -271,6 +272,12 @@
     "backup": {
       "importFailed": "This backup could not be imported.",
       "deleted": "CV deleted."
+    },
+    "offline": {
+      "ready": "Ready for offline use. CVs save on this device.",
+      "preparing": "Preparing offline access...",
+      "unavailable": "Offline reopening is unavailable. Editing still saves on this device.",
+      "disconnected": "You are offline. Keep editing and saving on this device. AI generation needs a reachable provider."
     }
   }
 }

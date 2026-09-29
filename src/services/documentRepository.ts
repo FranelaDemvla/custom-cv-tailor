@@ -35,26 +35,36 @@ function clone<T>(value: T): T {
 }
 
 function safeStyle(value: unknown): ResumeStyleOptions {
-  const record = value && typeof value === "object" ? value as Record<string, unknown> : {};
-  const fontId: ResumeFontId = record.fontId === "times" ? "times" : "helvetica";
+  const record =
+    value && typeof value === "object"
+      ? (value as Record<string, unknown>)
+      : {};
+  const fontId: ResumeFontId =
+    record.fontId === "times" ? "times" : "helvetica";
   const accentId: ResumeAccentId =
     record.accentId === "charcoal" ||
     record.accentId === "teal" ||
     record.accentId === "burgundy"
       ? record.accentId
       : "navy";
-  const padding = typeof record.padding === "number" && Number.isFinite(record.padding)
-    ? Math.min(52, Math.max(18, record.padding))
-    : DEFAULT_RESUME_LAYOUT.padding;
-  const fontScale = typeof record.fontScale === "number" && Number.isFinite(record.fontScale)
-    ? Math.min(1.15, Math.max(0.85, record.fontScale))
-    : DEFAULT_RESUME_LAYOUT.fontScale;
+  const padding =
+    typeof record.padding === "number" && Number.isFinite(record.padding)
+      ? Math.min(52, Math.max(18, record.padding))
+      : DEFAULT_RESUME_LAYOUT.padding;
+  const fontScale =
+    typeof record.fontScale === "number" && Number.isFinite(record.fontScale)
+      ? Math.min(1.15, Math.max(0.85, record.fontScale))
+      : DEFAULT_RESUME_LAYOUT.fontScale;
   return { padding, fontScale, fontId, accentId };
 }
 
 function safeProvider(value: unknown): ProviderSettings {
-  const record = value && typeof value === "object" ? value as Record<string, unknown> : {};
-  const provider: ProviderKind = record.provider === "openai" ? "openai" : "local";
+  const record =
+    value && typeof value === "object"
+      ? (value as Record<string, unknown>)
+      : {};
+  const provider: ProviderKind =
+    record.provider === "openai" ? "openai" : "local";
   const transport = record.transport === "responses" ? "responses" : "chat";
   return {
     provider,
@@ -65,33 +75,38 @@ function safeProvider(value: unknown): ProviderSettings {
 }
 
 function normalizeDocument(value: unknown, rekey = false): CVDocument {
-  if (!value || typeof value !== "object") throw new Error("Document is not an object");
+  if (!value || typeof value !== "object")
+    throw new Error("Document is not an object");
   const record = value as Record<string, unknown>;
-  const source = record.source && typeof record.source === "object"
-    ? record.source as Record<string, unknown>
-    : {};
+  const source =
+    record.source && typeof record.source === "object"
+      ? (record.source as Record<string, unknown>)
+      : {};
   const now = new Date().toISOString();
   const contentStatus: DocumentContentStatus =
-    record.contentStatus === "generated" || record.contentStatus === "interrupted"
+    record.contentStatus === "generated" ||
+    record.contentStatus === "interrupted"
       ? record.contentStatus
       : "draft";
-  const outputLanguage: OutputLanguage = record.outputLanguage === "es" ? "es" : "en";
+  const outputLanguage: OutputLanguage =
+    record.outputLanguage === "es" ? "es" : "en";
   const mode: Mode = record.mode === "format" ? "format" : "tailor";
   return {
     id: rekey || typeof record.id !== "string" ? createId() : record.id,
     schemaVersion: 1,
-    title: typeof record.title === "string"
-      ? record.title.trim().slice(0, 120)
-      : "",
+    title:
+      typeof record.title === "string" ? record.title.trim().slice(0, 120) : "",
     createdAt: typeof record.createdAt === "string" ? record.createdAt : now,
     updatedAt: typeof record.updatedAt === "string" ? record.updatedAt : now,
-    revision: typeof record.revision === "number" && Number.isInteger(record.revision)
-      ? Math.max(0, record.revision)
-      : 0,
+    revision:
+      typeof record.revision === "number" && Number.isInteger(record.revision)
+        ? Math.max(0, record.revision)
+        : 0,
     source: {
       cvText: typeof source.cvText === "string" ? source.cvText : "",
       jdText: typeof source.jdText === "string" ? source.jdText : "",
-      cvFileName: typeof source.cvFileName === "string" ? source.cvFileName : undefined,
+      cvFileName:
+        typeof source.cvFileName === "string" ? source.cvFileName : undefined,
     },
     mode,
     outputLanguage,
@@ -99,26 +114,25 @@ function normalizeDocument(value: unknown, rekey = false): CVDocument {
     style: safeStyle(record.style),
     provider: safeProvider(record.provider),
     contentStatus,
-    lastExportedAt: typeof record.lastExportedAt === "string" ? record.lastExportedAt : undefined,
+    lastExportedAt:
+      typeof record.lastExportedAt === "string"
+        ? record.lastExportedAt
+        : undefined,
   };
 }
 
 function readFallback(): CVDocument[] {
-  try {
-    const raw = localStorage.getItem(FALLBACK_KEY);
-    if (!raw) return [];
-    const parsed: unknown = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed.flatMap((item) => {
-      try {
-        return [normalizeDocument(item)];
-      } catch {
-        return [];
-      }
-    });
-  } catch {
-    return [];
-  }
+  const raw = localStorage.getItem(FALLBACK_KEY);
+  if (!raw) return [];
+  const parsed: unknown = JSON.parse(raw);
+  if (!Array.isArray(parsed)) throw new Error("Unable to read CV storage");
+  return parsed.flatMap((item) => {
+    try {
+      return [normalizeDocument(item)];
+    } catch {
+      return [];
+    }
+  });
 }
 
 function writeFallback(documents: CVDocument[]) {
@@ -128,7 +142,8 @@ function writeFallback(documents: CVDocument[]) {
 function openDatabase(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
-    request.onerror = () => reject(request.error || new Error("Unable to open CV storage"));
+    request.onerror = () =>
+      reject(request.error || new Error("Unable to open CV storage"));
     request.onupgradeneeded = () => {
       const db = request.result;
       if (!db.objectStoreNames.contains(STORE_NAME)) {
@@ -141,34 +156,41 @@ function openDatabase(): Promise<IDBDatabase> {
 
 function requestValue<T>(request: IDBRequest<T>): Promise<T> {
   return new Promise((resolve, reject) => {
-    request.onerror = () => reject(request.error || new Error("CV storage request failed"));
+    request.onerror = () =>
+      reject(request.error || new Error("CV storage request failed"));
     request.onsuccess = () => resolve(request.result);
   });
 }
 
 export async function listDocuments(): Promise<CVDocument[]> {
   if (!hasIndexedDb()) return readFallback().sort(sortByUpdated);
+  const db = await openDatabase();
   try {
-    const db = await openDatabase();
-    const records = await requestValue(db.transaction(STORE_NAME, "readonly").objectStore(STORE_NAME).getAll());
+    const records = await requestValue(
+      db.transaction(STORE_NAME, "readonly").objectStore(STORE_NAME).getAll(),
+    );
+    return records
+      .flatMap((record) => {
+        try {
+          return [normalizeDocument(record)];
+        } catch {
+          return [];
+        }
+      })
+      .sort(sortByUpdated);
+  } finally {
     db.close();
-    return records.flatMap((record) => {
-      try {
-        return [normalizeDocument(record)];
-      } catch {
-        return [];
-      }
-    }).sort(sortByUpdated);
-  } catch {
-    return readFallback().sort(sortByUpdated);
   }
 }
 
 export async function getDocument(id: string): Promise<CVDocument | null> {
-  if (!hasIndexedDb()) return readFallback().find((item) => item.id === id) ?? null;
+  if (!hasIndexedDb())
+    return readFallback().find((item) => item.id === id) ?? null;
   const db = await openDatabase();
   try {
-    const value = await requestValue(db.transaction(STORE_NAME, "readonly").objectStore(STORE_NAME).get(id));
+    const value = await requestValue(
+      db.transaction(STORE_NAME, "readonly").objectStore(STORE_NAME).get(id),
+    );
     return value ? normalizeDocument(value) : null;
   } finally {
     db.close();
@@ -200,19 +222,31 @@ export async function putDocument(
 
   const db = await openDatabase();
   return new Promise((resolve, reject) => {
-    const transaction = db.transaction(STORE_NAME, "readwrite");
+    let transaction: IDBTransaction;
+    try {
+      transaction = db.transaction(STORE_NAME, "readwrite");
+    } catch (error) {
+      db.close();
+      reject(error);
+      return;
+    }
     const store = transaction.objectStore(STORE_NAME);
     const getRequest = store.get(normalized.id);
     let finished = false;
     const fail = (error: Error) => {
       if (!finished) {
         finished = true;
-        try { transaction.abort(); } catch { /* transaction already closed */ }
+        try {
+          transaction.abort();
+        } catch {
+          /* transaction already closed */
+        }
         db.close();
         reject(error);
       }
     };
-    getRequest.onerror = () => fail(getRequest.error || new Error("CV storage request failed"));
+    getRequest.onerror = () =>
+      fail(getRequest.error || new Error("CV storage request failed"));
     getRequest.onsuccess = () => {
       const current = getRequest.result as CVDocument | undefined;
       if (expectedRevision !== null && current?.revision !== expectedRevision) {
@@ -232,8 +266,10 @@ export async function putDocument(
         resolve(normalized);
       }
     };
-    transaction.onerror = () => fail(transaction.error || new Error("CV storage write failed"));
-    transaction.onabort = () => fail(transaction.error || new Error("CV storage write aborted"));
+    transaction.onerror = () =>
+      fail(transaction.error || new Error("CV storage write failed"));
+    transaction.onabort = () =>
+      fail(transaction.error || new Error("CV storage write aborted"));
   });
 }
 
@@ -247,10 +283,13 @@ export async function deleteDocument(id: string): Promise<void> {
     await new Promise<void>((resolve, reject) => {
       const transaction = db.transaction(STORE_NAME, "readwrite");
       const request = transaction.objectStore(STORE_NAME).delete(id);
-      request.onerror = () => reject(request.error || new Error("CV storage delete failed"));
+      request.onerror = () =>
+        reject(request.error || new Error("CV storage delete failed"));
       transaction.oncomplete = () => resolve();
-      transaction.onerror = () => reject(transaction.error || new Error("CV storage delete failed"));
-      transaction.onabort = () => reject(transaction.error || new Error("CV storage delete aborted"));
+      transaction.onerror = () =>
+        reject(transaction.error || new Error("CV storage delete failed"));
+      transaction.onabort = () =>
+        reject(transaction.error || new Error("CV storage delete aborted"));
     });
   } finally {
     db.close();
@@ -267,18 +306,49 @@ export function makeBackup(documents: CVDocument[]): BackupFile {
 }
 
 export function parseBackup(value: unknown): CVDocument[] {
-  if (!value || typeof value !== "object") throw new Error("Backup is not an object");
+  if (!value || typeof value !== "object")
+    throw new Error("Backup is not an object");
   const record = value as Record<string, unknown>;
-  if (record.format !== "custom-cv-backup" || record.version !== 1 || !Array.isArray(record.documents)) {
+  if (
+    record.format !== "custom-cv-backup" ||
+    record.version !== 1 ||
+    !Array.isArray(record.documents)
+  ) {
     throw new Error("Unsupported backup format");
   }
   return record.documents.map((document) => normalizeDocument(document, true));
 }
 
-export async function importDocuments(documents: CVDocument[]): Promise<CVDocument[]> {
-  const imported = documents.map((document) => normalizeDocument(document, true));
-  for (const document of imported) {
-    await putDocument(document, null);
+export async function importDocuments(
+  documents: CVDocument[],
+): Promise<CVDocument[]> {
+  const imported = documents.map((document) =>
+    normalizeDocument(document, true),
+  );
+  if (!imported.length) return imported;
+  if (!hasIndexedDb()) {
+    writeFallback([...readFallback(), ...imported]);
+    return imported;
+  }
+  const db = await openDatabase();
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const transaction = db.transaction(STORE_NAME, "readwrite");
+      const store = transaction.objectStore(STORE_NAME);
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () =>
+        reject(transaction.error || new Error("CV backup import failed"));
+      transaction.onabort = () =>
+        reject(transaction.error || new Error("CV backup import aborted"));
+      try {
+        imported.forEach((document) => store.add(document));
+      } catch (error) {
+        transaction.abort();
+        reject(error);
+      }
+    });
+  } finally {
+    db.close();
   }
   return imported;
 }

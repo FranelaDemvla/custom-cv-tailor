@@ -1,4 +1,5 @@
 import { clsx } from "clsx";
+import { useId } from "react";
 
 export function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -19,10 +20,16 @@ export function Field({
   onChange: (value: string) => void;
   placeholder?: string;
 }) {
+  const id = useId();
   return (
     <div className="flex flex-col gap-0.5">
-      {label && <label className="field-label text-[10px]">{label}</label>}
+      {label && (
+        <label htmlFor={id} className="field-label text-[10px]">
+          {label}
+        </label>
+      )}
       <input
+        id={id}
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}

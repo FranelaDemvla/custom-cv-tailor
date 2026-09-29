@@ -11,6 +11,8 @@
 
 The source is TypeScript in src/. Browser persistence and PDF rendering still need browser verification in addition to these checks.
 
+Use Node.js 24 and `npm ci` with `package-lock.json` for deployment builds. The production-only offline plugin emits `dist/sw.js` and caches the complete build, including the PDF worker. Offline reload checks must use `npm run build` and `npm run preview`, not the development server. Browser regression scripts are in `scripts/browser-*-check.js`.
+
 ## Git conventions
 
 Use Conventional Commits for all new commits, for example `feat: add CV import` or `fix: preserve empty document titles`.
